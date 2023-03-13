@@ -194,7 +194,7 @@ application-manager:
                           operator:
                             channel: stable
                             installPlanApproval: Automatic
-                            name: openshift-pipelines-operator-rh
+                            name: pipelines-operator
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
                       pulp-operator:
