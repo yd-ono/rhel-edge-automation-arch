@@ -119,7 +119,7 @@ application-manager:
                       targetRevision: main
                       namespace: rfe-gitops
                       project: rfe
-                      destinationNamespace: openshift-gitops
+                      destinationNamespace: rfe-gitops
                       prune: true
                       selfHeal: true
                     charts:
