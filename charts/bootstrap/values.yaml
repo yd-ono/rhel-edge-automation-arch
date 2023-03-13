@@ -68,7 +68,7 @@ application-manager:
                 targetRevision: main
                 namespace: rfe-gitops
                 project: rfe
-                destinationNamespace: rfe-gitops
+                destinationNamespace: openshift-pipelines
                 prune: true
                 selfHeal: true
               charts:
