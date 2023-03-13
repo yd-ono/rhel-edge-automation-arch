@@ -172,6 +172,7 @@ application-manager:
                             sourceNamespace: openshift-marketplace
                       patch-operator:
                         name: patch-operator
+                        destinationNamespace: patch-operator
                         path: charts/operator
                         annotations:
                           argocd.argoproj.io/sync-wave: "0"
@@ -182,8 +183,6 @@ application-manager:
                             name: patch-operator
                             source: community-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                       pipelines-operator:
                         name: pipelines-operator
                         path: charts/operator
