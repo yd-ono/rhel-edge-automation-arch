@@ -182,8 +182,6 @@ application-manager:
                             name: patch-operator
                             source: community-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: true
                       pipelines-operator:
                         name: pipelines-operator
                         path: charts/operator
@@ -196,8 +194,6 @@ application-manager:
                             name: openshift-pipelines-operator-rh
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                       pulp-operator:
                         name: pulp-operator
                         path: charts/operator
@@ -222,8 +218,6 @@ application-manager:
                             name: quay-operator
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                 # User Mgmt
                 user-mgmt:
                   name: user-mgmt
