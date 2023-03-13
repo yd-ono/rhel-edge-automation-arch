@@ -210,7 +210,6 @@ application-manager:
                             channel: alpha
                             installPlanApproval: Automatic
                             name: pulp-operator
-                            namespace: pulp
                             source: community-operators
                             sourceNamespace: openshift-marketplace
                       quay-operator:
