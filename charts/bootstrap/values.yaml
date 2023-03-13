@@ -185,8 +185,8 @@ application-manager:
                             sourceNamespace: openshift-marketplace
                       pipelines-operator:
                         name: pipelines-operator
+                        destinationNamespace: openshift-operators
                         path: charts/operator
-                        destinationNamespace: openshift-pipelines
                         annotations:
                           argocd.argoproj.io/sync-wave: "0"
                         values:
@@ -196,6 +196,8 @@ application-manager:
                             name: openshift-pipelines-operator-rh
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
+                          operatorgroup:
+                            create: false
                       pulp-operator:
                         name: pulp-operator
                         path: charts/operator
