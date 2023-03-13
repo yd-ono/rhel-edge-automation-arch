@@ -68,7 +68,7 @@ application-manager:
                 targetRevision: main
                 namespace: rfe-gitops
                 project: rfe
-                destinationNamespace: openshift-pipelines
+                destinationNamespace: rfe-gitops
                 prune: true
                 selfHeal: true
               charts:
@@ -119,7 +119,7 @@ application-manager:
                       targetRevision: main
                       namespace: rfe-gitops
                       project: rfe
-                      destinationNamespace: rfe-gitops
+                      destinationNamespace: openshift-operators
                       prune: true
                       selfHeal: true
                     charts:
@@ -182,7 +182,8 @@ application-manager:
                             name: patch-operator
                             source: community-operators
                             sourceNamespace: openshift-marketplace
-                            targetNamespace: test-patch-operator
+                          operatorgroup:
+                            create: false
                       pipelines-operator:
                         name: pipelines-operator
                         path: charts/operator
@@ -190,12 +191,14 @@ application-manager:
                           argocd.argoproj.io/sync-wave: "0"
                         values:
                           operator:
-                            channel: latest
+                            channel: stable
                             installPlanApproval: Automatic
                             name: openshift-pipelines-operator-rh
+                            namespace: openshift-pipelines
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
-                            targetNamespace: openshift-pipelines
+                          operatorgroup:
+                            create: false
                       pulp-operator:
                         name: pulp-operator
                         path: charts/operator
@@ -203,7 +206,7 @@ application-manager:
                           argocd.argoproj.io/sync-wave: "0"
                         values:
                           operator:
-                            channel: beta
+                            channel: alpha
                             installPlanApproval: Automatic
                             name: pulp-operator
                             source: community-operators
@@ -220,6 +223,8 @@ application-manager:
                             name: quay-operator
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
+                          operatorgroup:
+                            create: false
                 # User Mgmt
                 user-mgmt:
                   name: user-mgmt
@@ -271,7 +276,7 @@ application-manager:
               argocd.argoproj.io/sync-wave: "1"
             values:
               common:
-                repoURL: https://github.com/redhat-cop/rhel-edge-automation-arch.git
+                repoURL: https://github.com/yd-ono/rhel-edge-automation-arch.git
                 targetRevision: main
                 namespace: rfe-gitops
                 project: rfe

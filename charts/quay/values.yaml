@@ -26,7 +26,7 @@ quayRegistryCR:
   targetNamespace: quay
 
 setupJob:
-  gitRepository: https://github.com/redhat-cop/rhel-edge-automation-arch.git
+  gitRepository: https://github.com/yd-ono/rhel-edge-automation-arch.git
   gitBranch: main
   annotations:
     argocd.argoproj.io/hook: PostSync

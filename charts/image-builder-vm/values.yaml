@@ -32,5 +32,5 @@ imageBuilderVM:
   disk: 150Gi
   replicas: 1
 
-gitRepository: https://github.com/redhat-cop/rhel-edge-automation-arch.git
+gitRepository: https://github.com/yd-ono/rhel-edge-automation-arch.git
 gitBranch: main
