@@ -184,7 +184,7 @@ application-manager:
                             source: community-operators
                             sourceNamespace: openshift-marketplace
                       pipelines-operator:
-                        name: openshift-pipelines-operator-rh
+                        name: pipelines-operator
                         path: charts/operator
                         destinationNamespace: openshift-pipelines
                         annotations:
