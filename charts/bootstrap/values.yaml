@@ -172,7 +172,6 @@ application-manager:
                             sourceNamespace: openshift-marketplace
                       patch-operator:
                         name: patch-operator
-                        destinationNamespace: pulp
                         path: charts/operator
                         annotations:
                           argocd.argoproj.io/sync-wave: "0"
