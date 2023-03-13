@@ -183,7 +183,7 @@ application-manager:
                             source: community-operators
                             sourceNamespace: openshift-marketplace
                           operatorgroup:
-                            create: false
+                            create: true
                       pipelines-operator:
                         name: pipelines-operator
                         path: charts/operator
