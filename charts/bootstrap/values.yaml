@@ -191,7 +191,7 @@ application-manager:
                           argocd.argoproj.io/sync-wave: "0"
                         values:
                           operator:
-                            channel: stable
+                            channel: latest
                             installPlanApproval: Automatic
                             name: openshift-pipelines-operator-rh
                             source: redhat-operators
