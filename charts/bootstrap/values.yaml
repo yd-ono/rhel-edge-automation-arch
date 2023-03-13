@@ -172,6 +172,7 @@ application-manager:
                             sourceNamespace: openshift-marketplace
                       patch-operator:
                         name: patch-operator
+                        destinationNamespace: pulp
                         path: charts/operator
                         annotations:
                           argocd.argoproj.io/sync-wave: "0"
@@ -197,8 +198,6 @@ application-manager:
                             name: openshift-pipelines-operator-rh
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                       pulp-operator:
                         name: pulp-operator
                         path: charts/operator
@@ -225,8 +224,6 @@ application-manager:
                             name: quay-operator
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                 # User Mgmt
                 user-mgmt:
                   name: user-mgmt
