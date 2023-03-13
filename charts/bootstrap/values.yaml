@@ -182,6 +182,7 @@ application-manager:
                             name: patch-operator
                             source: community-operators
                             sourceNamespace: openshift-marketplace
+                            targetNamespace: test-patch-operator
                       pipelines-operator:
                         name: pipelines-operator
                         path: charts/operator
@@ -194,6 +195,7 @@ application-manager:
                             name: openshift-pipelines-operator-rh
                             source: redhat-operators
                             sourceNamespace: openshift-marketplace
+                            targetNamespace: openshift-pipelines
                       pulp-operator:
                         name: pulp-operator
                         path: charts/operator
