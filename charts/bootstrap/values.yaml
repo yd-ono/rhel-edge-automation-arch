@@ -108,6 +108,10 @@ application-manager:
                         annotations:
                           openshift.io/description: Pulp
                           openshift.io/display-name: Pulp
+                      - name: patch-operator
+                        annotations:
+                          openshift.io/description: Patch Operator
+                          openshift.io/display-name: Patch Operator
 
                 # Operators App of App Chart
                 operators:
