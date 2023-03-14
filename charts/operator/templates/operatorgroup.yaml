@@ -12,6 +12,8 @@ metadata:
     {{- toYaml .Values.operatorgroup.annotations | nindent 4 }}
   {{- end }}
 spec:
+  {{- if ne .Release.Namespace "patch-operator" }}
   targetNamespaces:
     - {{ template "common.names.namespace" . }}
+  {{- end }}
 {{- end }}
