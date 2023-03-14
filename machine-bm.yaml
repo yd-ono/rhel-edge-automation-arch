@@ -1,0 +1,64 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: demo-lpmsr-bm-worker-ap-northeast-1a
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: demo-lpmsr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: demo-lpmsr
+      machine.openshift.io/cluster-api-machineset: demo-lpmsr-bm-worker-ap-northeast-1a
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: demo-lpmsr
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: demo-lpmsr-bm-worker-ap-northeast-1a
+    spec:
+      lifecycleHooks: {}
+      metadata: {}
+      providerSpec:
+        value:
+          userDataSecret:
+            name: worker-user-data
+          placement:
+            availabilityZone: ap-northeast-1a
+            region: ap-northeast-1
+          credentialsSecret:
+            name: aws-cloud-credentials
+          instanceType: m5.metal
+          metadata:
+            creationTimestamp: null
+          blockDevices:
+            - ebs:
+                encrypted: true
+                iops: 0
+                kmsKey:
+                  arn: ''
+                volumeSize: 120
+                volumeType: gp3
+          securityGroups:
+            - filters:
+                - name: 'tag:Name'
+                  values:
+                    - demo-lpmsr-worker-sg
+          kind: AWSMachineProviderConfig
+          metadataServiceOptions: {}
+          tags:
+            - name: kubernetes.io/cluster/demo-lpmsr
+              value: owned
+          deviceIndex: 0
+          ami:
+            id: ami-0a226dbcc9a561c40
+          subnet:
+            filters:
+              - name: 'tag:Name'
+                values:
+                  - demo-lpmsr-private-ap-northeast-1a
+          apiVersion: machine.openshift.io/v1beta1
+          iamInstanceProfile:
+            id: demo-lpmsr-worker-profile
