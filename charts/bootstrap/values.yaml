@@ -210,7 +210,7 @@ application-manager:
                           argocd.argoproj.io/sync-wave: "0"
                         values:
                           operator:
-                            channel: alpha
+                            channel: beta
                             installPlanApproval: Automatic
                             name: pulp-operator
                             source: community-operators
