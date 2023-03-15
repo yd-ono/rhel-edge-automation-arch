@@ -28,8 +28,6 @@ spec:
   api:
     replicas: 1
   image: {{ .Values.image.image }}
-  resource_manager:
-    replicas: 1
   storage_type: {{ ternary "S3" "File" .Values.storage.s3.enabled }}
   worker:
     replicas: {{ .Values.worker.replicas }}
