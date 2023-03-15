@@ -8,7 +8,6 @@ metadata:
   labels:
     {{- include "common.labels.labels" . | nindent 4 }}
 spec:
-  route_tls_termination_mechanism: {{ .Values.ingress.termination }}
   ingress_type: {{ .Values.ingress.type }}
   image_pull_policy: {{ .Values.image.pullPolicy }}
   object_storage_s3_secret: {{ template "pulp.s3SecretName" . }}
