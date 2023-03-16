@@ -57,4 +57,4 @@ spec:
   results:
     - name: iso-storage-url
       description: Location where the asset is served
-      value: $(tasks.generate-iso.results.iso-storage-url)
+      value: $(tasks.create-rfe-iso.results.iso-storage-url)

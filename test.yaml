@@ -1,0 +1,64 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    app.kubernetes.io/instance: rfe-pipelines
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pipelines
+    helm.sh/chart: pipelines-0.1.0
+  name: rfe-iso-pipeline
+  namespace: rfe
+spec:
+  params:
+    - default: 'https://github.com/yd-ono/rhel-edge-automation-arch.git'
+      description: Tooling Repository URL
+      name: tooling-git-url
+      type: string
+    - default: main
+      description: Tooling Repository URL Reference
+      name: tooling-git-revision
+      type: string
+    - description: URL pointing to kickstart location
+      name: kickstart-url
+      type: string
+    - description: Name of the RFE ISO
+      name: rfe-iso-name
+      type: string
+  tasks:
+    - name: git-clone-tooling
+      params:
+        - name: url
+          value: $(params.tooling-git-url)
+        - name: revision
+          value: $(params.tooling-git-revision)
+        - name: subdirectory
+          value: tooling
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: create-rfe-iso
+      params:
+        - name: kickstart-url
+          value: $(params.kickstart-url)
+        - name: rfe-iso-name
+          value: $(params.rfe-iso-name)
+      runAfter:
+        - git-clone-tooling
+      taskRef:
+        kind: Task
+        name: generate-iso
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+  workspaces:
+    - name: shared-workspace
+  results:
+    - description: Location where the asset is served
+      name: iso-storage-url
+      value: $(tasks.create-rfe-iso.results.iso-storage-url)
