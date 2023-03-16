@@ -47,6 +47,8 @@ The `rfe-oci-image-pipeline` Tekton pipeline is responsible for building new RHE
 From the root of the project, execute the following command to execute the `rfe-oci-image-pipeline` pipeline to build the `hello-world` blueprint:
 
 ```shell
+oc adm policy add-scc-to-user pipelines-scc -z rfe-automation
+
 tkn pipeline start rfe-oci-image-pipeline \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
 -s rfe-automation \
