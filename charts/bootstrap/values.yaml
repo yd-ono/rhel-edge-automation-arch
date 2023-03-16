@@ -218,6 +218,7 @@ application-manager:
                             sourceNamespace: openshift-marketplace
                       quay-operator:
                         name: quay-operator
+                        destinationNamespace: openshift-operators
                         path: charts/operator
                         annotations:
                           argocd.argoproj.io/sync-wave: "0"
