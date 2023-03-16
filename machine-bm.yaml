@@ -1,23 +1,23 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
-  name: demo-lpmsr-bm-worker-ap-northeast-1a
+  name: demo-mgfmv-bm-worker-ap-northeast-1a
   namespace: openshift-machine-api
   labels:
-    machine.openshift.io/cluster-api-cluster: demo-lpmsr
+    machine.openshift.io/cluster-api-cluster: demo-mgfmv
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: demo-lpmsr
-      machine.openshift.io/cluster-api-machineset: demo-lpmsr-bm-worker-ap-northeast-1a
+      machine.openshift.io/cluster-api-cluster: demo-mgfmv
+      machine.openshift.io/cluster-api-machineset: demo-mgfmv-bm-worker-ap-northeast-1a
   template:
     metadata:
       labels:
-        machine.openshift.io/cluster-api-cluster: demo-lpmsr
+        machine.openshift.io/cluster-api-cluster: demo-mgfmv
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: demo-lpmsr-bm-worker-ap-northeast-1a
+        machine.openshift.io/cluster-api-machineset: demo-mgfmv-bm-worker-ap-northeast-1a
     spec:
       lifecycleHooks: {}
       metadata: {}
@@ -45,11 +45,11 @@ spec:
             - filters:
                 - name: 'tag:Name'
                   values:
-                    - demo-lpmsr-worker-sg
+                    - demo-mgfmv-worker-sg
           kind: AWSMachineProviderConfig
           metadataServiceOptions: {}
           tags:
-            - name: kubernetes.io/cluster/demo-lpmsr
+            - name: kubernetes.io/cluster/demo-mgfmv
               value: owned
           deviceIndex: 0
           ami:
@@ -58,7 +58,7 @@ spec:
             filters:
               - name: 'tag:Name'
                 values:
-                  - demo-lpmsr-private-ap-northeast-1a
+                  - demo-mgfmv-private-ap-northeast-1a
           apiVersion: machine.openshift.io/v1beta1
           iamInstanceProfile:
-            id: demo-lpmsr-worker-profile
+            id: demo-mgfmv-worker-profile
