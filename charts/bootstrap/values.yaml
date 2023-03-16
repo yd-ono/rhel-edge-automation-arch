@@ -214,8 +214,6 @@ application-manager:
                             name: pulp-operator
                             source: community-operators
                             sourceNamespace: openshift-marketplace
-                          operatorgroup:
-                            create: false
                       quay-operator:
                         name: quay-operator
                         path: charts/operator
