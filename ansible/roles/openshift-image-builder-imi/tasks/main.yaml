@@ -13,7 +13,14 @@
   register: vmi_results
   retries: 60
   until:
-    - vmi_results.resources
+    - vmi_results.resources | list | length == (image_builder_replicas | int)
+    - >
+      vmi_results.resources |
+        json_query('[*].status.conditions[?type==`Ready`].status') |
+        flatten |
+        select('match', 'True') |
+        list |
+        length == (image_builder_replicas | int)
 
 - name: Generate In-Memory Inventory of Image Builder VM(s)
   ansible.builtin.add_host:
