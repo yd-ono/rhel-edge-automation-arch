@@ -15,8 +15,8 @@
         [
           {
             'host': item,
-            'id': (hostvars[item].compose_status.stdout | from_json)[0].id,
-            'status': (hostvars[item].compose_status.stdout | from_json)[0].status
+            'id': (hostvars[item].compose_status.stdout | to_json | from_json)[0].id,
+            'status': (hostvars[item].compose_status.stdout | to_json | from_json)[0].status
           }
         ]
       }}
@@ -24,7 +24,7 @@
   loop: "{{ ansible_play_hosts }}"
   run_once: yes
   when:
-    - (hostvars[item].compose_status.stdout | from_json) | count > 0
+    - (hostvars[item].compose_status.stdout | to_json | from_json) | count > 0
 
 - name: Find Hosts with Compose Running
   ansible.builtin.set_fact:
