@@ -45,7 +45,7 @@
 
 - name: Set Blueprint Version Number
   ansible.builtin.set_fact:
-    blueprint_version: "{{ (frozen_blueprint.stdout | from_json).blueprints[0].blueprint.version }}"
+    blueprint_version: "{{ (frozen_blueprint.stdout | from_json).body.blueprints[0].blueprint.version }}"
 
 - name: Image Builder
   block:
@@ -56,7 +56,16 @@
 
     - name: Set Build Commit ID
       ansible.builtin.set_fact:
-        build_commit_id: "{{ (composed_image.stdout | from_json).build_id }}"
+        build_commit_id: "{{ (composed_image.stdout | from_json).body.build_id }}"
+
+    - name: debug-1
+      ansible.builtin.command: >
+        composer-cli -j compose status
+      register: debug_image_build_status
+
+    - name: debug-2 var debug_image_build_status
+      debug:
+        msg: "{{ debug_image_build_status.stdout | from_json }}"
 
     - name: Wait for Image Build to Complete
       ansible.builtin.command: >
