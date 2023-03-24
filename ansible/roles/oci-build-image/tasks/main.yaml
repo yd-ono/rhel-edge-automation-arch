@@ -58,6 +58,10 @@
       ansible.builtin.set_fact:
         build_commit_id: "{{ (composed_image.stdout | from_json).body.build_id }}"
 
+    - name: Debug Build Commit ID
+      debug:
+        msg: "{{ build_commit_id }}"
+
     - name: Wait for Image Build to Complete
       ansible.builtin.shell: >
         composer-cli compose status | grep {{ build_commit_id }} | awk '{print $2}'
