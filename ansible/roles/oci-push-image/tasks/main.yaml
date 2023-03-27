@@ -35,7 +35,7 @@
 
 - name: List Finished Builds
   ansible.builtin.shell: >
-    composer-cli compose list finished | grep {{ build_commit_id }} | grep wc -l
+    composer-cli compose list finished | grep {{ build_commit_id }} | wc -l
   changed_when: false
   register: compose_list
 

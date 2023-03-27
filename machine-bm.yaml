@@ -1,23 +1,23 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
-  name: demo-mgfmv-bm-worker-ap-northeast-1a
+  name: demo-2vpbl-bm-worker-ap-northeast-1a
   namespace: openshift-machine-api
   labels:
-    machine.openshift.io/cluster-api-cluster: demo-mgfmv
+    machine.openshift.io/cluster-api-cluster: demo-2vpbl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: demo-mgfmv
-      machine.openshift.io/cluster-api-machineset: demo-mgfmv-bm-worker-ap-northeast-1a
+      machine.openshift.io/cluster-api-cluster: demo-2vpbl
+      machine.openshift.io/cluster-api-machineset: demo-2vpbl-bm-worker-ap-northeast-1a
   template:
     metadata:
       labels:
-        machine.openshift.io/cluster-api-cluster: demo-mgfmv
+        machine.openshift.io/cluster-api-cluster: demo-2vpbl
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: demo-mgfmv-bm-worker-ap-northeast-1a
+        machine.openshift.io/cluster-api-machineset: demo-2vpbl-bm-worker-ap-northeast-1a
     spec:
       lifecycleHooks: {}
       metadata: {}
@@ -45,11 +45,11 @@ spec:
             - filters:
                 - name: 'tag:Name'
                   values:
-                    - demo-mgfmv-worker-sg
+                    - demo-2vpbl-worker-sg
           kind: AWSMachineProviderConfig
           metadataServiceOptions: {}
           tags:
-            - name: kubernetes.io/cluster/demo-mgfmv
+            - name: kubernetes.io/cluster/demo-2vpbl
               value: owned
           deviceIndex: 0
           ami:
@@ -58,7 +58,7 @@ spec:
             filters:
               - name: 'tag:Name'
                 values:
-                  - demo-mgfmv-private-ap-northeast-1a
+                  - demo-2vpbl-private-ap-northeast-1a
           apiVersion: machine.openshift.io/v1beta1
           iamInstanceProfile:
-            id: demo-mgfmv-worker-profile
+            id: demo-2vpbl-worker-profile
