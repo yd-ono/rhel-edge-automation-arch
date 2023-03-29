@@ -43,7 +43,7 @@
   ansible.builtin.assert:
     fail_msg: "Did not find a valid finished build for the commit id {{ build_commit_id }}!"
     that:
-      - compose_list.stdout == 1
+      - compose_list.stdout == "1"
 
 - name: Set Remote Tar Directory
   ansible.builtin.set_fact:
@@ -82,7 +82,7 @@
   delegate_to: localhost
 
 - name: Fetch RFE Build tar
-  become: no
+  become: yes
   ansible.builtin.fetch:
     dest: "{{ find_results.files[0].path }}"
     flat: yes

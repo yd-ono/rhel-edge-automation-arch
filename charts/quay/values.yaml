@@ -8,7 +8,7 @@ quay:
     - kind: monitoring
       managed: true
     - kind: objectstorage
-      managed: false
+      managed: true
     - kind: postgres
       managed: true
     - kind: redis

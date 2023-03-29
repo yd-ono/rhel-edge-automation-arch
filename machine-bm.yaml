@@ -1,23 +1,23 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
-  name: demo-2vpbl-bm-worker-ap-northeast-1a
+  name: demo-xz596-bm-worker-ap-northeast-1a
   namespace: openshift-machine-api
   labels:
-    machine.openshift.io/cluster-api-cluster: demo-2vpbl
+    machine.openshift.io/cluster-api-cluster: demo-xz596
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: demo-2vpbl
-      machine.openshift.io/cluster-api-machineset: demo-2vpbl-bm-worker-ap-northeast-1a
+      machine.openshift.io/cluster-api-cluster: demo-xz596
+      machine.openshift.io/cluster-api-machineset: demo-xz596-bm-worker-ap-northeast-1a
   template:
     metadata:
       labels:
-        machine.openshift.io/cluster-api-cluster: demo-2vpbl
+        machine.openshift.io/cluster-api-cluster: demo-xz596
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: demo-2vpbl-bm-worker-ap-northeast-1a
+        machine.openshift.io/cluster-api-machineset: demo-xz596-bm-worker-ap-northeast-1a
     spec:
       lifecycleHooks: {}
       metadata: {}
@@ -45,11 +45,11 @@ spec:
             - filters:
                 - name: 'tag:Name'
                   values:
-                    - demo-2vpbl-worker-sg
+                    - demo-xz596-worker-sg
           kind: AWSMachineProviderConfig
           metadataServiceOptions: {}
           tags:
-            - name: kubernetes.io/cluster/demo-2vpbl
+            - name: kubernetes.io/cluster/demo-xz596
               value: owned
           deviceIndex: 0
           ami:
@@ -58,7 +58,7 @@ spec:
             filters:
               - name: 'tag:Name'
                 values:
-                  - demo-2vpbl-private-ap-northeast-1a
+                  - demo-xz596-private-ap-northeast-1a
           apiVersion: machine.openshift.io/v1beta1
           iamInstanceProfile:
-            id: demo-2vpbl-worker-profile
+            id: demo-xz596-worker-profile
