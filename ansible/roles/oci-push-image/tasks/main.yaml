@@ -82,7 +82,7 @@
   delegate_to: localhost
 
 - name: Fetch RFE Build tar
-  become: yes
+  become: no
   ansible.builtin.fetch:
     dest: "{{ find_results.files[0].path }}"
     flat: yes
