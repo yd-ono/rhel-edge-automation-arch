@@ -17,9 +17,11 @@
 * OpenShift Pipelines
   * Ansible playbookの実行
 * Nexus
-  * 
-* 一般的なオブジェクトストレージとしてOpenShift Data Foundation（NooBaaのみ）を使用します。
-* RFE OSTreeのコンテンツをRed Hat Quayで配信開始
+  * アーティファクトの管理
+* OpenShift Data Foundation
+  *  オブジェクトストレージ(Quayで使用)
+* Red Hat Quay
+  * RHEL for EdgeのOSTreeのコンテンツをホスト
 
 ## 動作確認済みの環境
 
@@ -35,13 +37,13 @@ git clone https://github.com/yd-ono/rhel-edge-automation-arch.git
 
 ### SSHキーペアとRed Hatポータルの認証情報の設定
 
-| コンポーネント｜説明 | 
+| コンポーネント｜説明 
 |:-----------------------------|:------------------------------------------------------------------------|
-| SSHキー｜Image Builder VMへのキーベースの認証をサポートするために使用します。 |
-| Red Hat Portalのユーザー名｜Image Builder VMを購読するためのユーザー名｜Image Builder VMを購読するためのユーザー数 |
-| Red Hat Portalのパスワード｜Image BuilderのVMを登録するためのパスワードです。|
-| プール ID｜Red Hat Subscription Manager のプール ID を使用して、適切なサブスクリプションを Image Builder VM にマップします。|
-| Red Hat Portal Offline Token｜Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークンです。｜
+| SSHキー｜Image Builder VMへのキーベースの認証をサポートするために使用します。 
+| Red Hat Portalのユーザー名｜Image Builder VMを購読するためのユーザー名｜Image Builder VMを購読するためのユーザー数 
+| Red Hat Portalのパスワード｜Image BuilderのVMを登録するためのパスワードです。
+| プール ID｜Red Hat Subscription Manager のプール ID を使用して、適切なサブスクリプションを Image Builder VM にマップします。
+| Red Hat Portal Offline Token｜Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークンです。
 
 SSHキーペアを生成するには、以下のコマンドを実行します。
 
@@ -93,7 +95,8 @@ ArgoCDが`chart`ディレクトリ配下の各Helmチャートを参照するよ
 helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ -f examples/values/local/bootstrap.yaml -f examples/values/deployment/default.yaml
 ```
 
-デフォルトのインストールでは、クラスタ上のすべての管理対象コンポーネントのデプロイと構成が行われます。HTPasswdのIDプロバイダは、パスワードに`openshift`を指定した5人のユーザー（user{1-5}）に対して設定されます。
+デフォルトのインストールでは、クラスタ上のすべての管理対象コンポーネントのデプロイと構成が行われます。
+HTPasswdのIDプロバイダは、パスワードに`openshift`を指定した5人のユーザー（user{1-5}）に対して設定されます。
 
 Argo CD のダッシュボードでデプロイの進捗を確認することができます。URL を取得するには、以下のコマンドを実行します。
 
@@ -121,74 +124,6 @@ oc edit tektonconfig
 ...
     enable-api-fields: alpha
 ...
-```
-
-## デプロイメントをカスタマイズする
-プロジェクトのすべてのコンポーネントのデプロイと管理には、HelmとArgo CDが使用されます。高いレベルでは、アプリケーションマネージャと呼ばれる Helm チャートが、Argo CD のアプリパターンのネストしたアプリを動的に構築するために使用されます。Argo CD の各アプリケーションは、特定のプロジェクトコンポーネントをインストールおよび設定する Helm チャートへのポインタです。デプロイのブートストラップ時に、Helm値ファイルを使用して、どのコンポーネントをデプロイすべきか、どのように設定すべきかをアプリケーションマネージャに伝えます。このパターンを使用することで、特定の環境に合わせたデプロイメントを行う際に、かなりの柔軟性を得ることができます。
-
-## コンポーネントの無効化
-特定のコンポーネントのデプロイ/管理を無効にしたい場合（たとえば、ODFがすでにインストールされている独自のクラスタを持ち込む場合など）、チャートの値ファイルにdisable: trueを設定します。例えば、ODFを無効にするには、examples/values/local/disable-odf.yamlに以下のファイルを作成します。
-
-```yaml
-# Dynamically Generated Charts
-application-manager:
-  charts:
-    # Top Level RFE App of App Chart
-    rfe-automation:
-      values:
-        charts:
-          # Cluster Configuration App of App Chart
-          cluster-configs:
-            values:
-              charts:
-                # OpenShift Data Foundations
-                odf:
-                  disabled: true
- 
-                 # Operators App of App Chart
-                operators:
-                  values:
-                    charts:
-                      odf-operator:
-                        disabled: true
-```
-
-プロジェクトをデプロイする際に、この値ファイルをhelmに渡します。例えば、以下のような感じです。
-
-```shell
-helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ -f examples/values/local/bootstrap.yaml -f examples/values/deployment/default.yaml -f examples/values/local/disable-odf.yaml
-```
-
-### コンポーネントのカスタマイズ
-charts/ディレクトリの各チャートには、デフォルト値ファイルがあります。これらの値は、上記の「コンポーネントを無効にする」で示したのと同じパターンで上書きすることができます。
-
-たとえば、OpenShift Virtualizationのプロセッサエミュレーションを有効にするには、チャートの値ファイルにuseEmulation: trueを設定します。次のファイルを examples/values/local/cnv-processor-emulation.yaml に保存します。
-
-```yaml
----
-# Dynamically Generated Charts
-application-manager:
-  charts:
-    # Top Level RFE App of App Chart
-    rfe-automation:
-      values:
-        charts:
-          # Cluster Configuration App of App Chart
-          cluster-configs:
-            values:
-              charts:
-                # OpenShift Virtualization
-                cnv:
-                  values:
-                    cnv:
-                      debug:
-                        useEmulation: "true"
-```
-
-プロジェクトをデプロイする際に、この値ファイルをhelmに渡します。例えば、以下のような感じです。
-
-```shell
-helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ -f examples/values/local/bootstrap.yaml -f examples/values/deployment/default.yaml -f examples/values/local/cnv-processor-emulation.yaml
 ```
 
 ## Basic Walkthrough
