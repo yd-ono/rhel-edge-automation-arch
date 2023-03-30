@@ -1,50 +1,53 @@
 # Basic Walkthrough
 
-This guide will help familiarize yourself with the process of building your first RHEL for Edge image using this architecture. By the end of this walk-through, you will:
+このガイドでは、このアーキテクチャを使用して最初の RHEL for Edge イメージを構築するプロセスについて説明します。このガイドでは、以下のことを学びます：
 
-* Understand the primary components in the architecture
-* Build a RHEL for Edge image from a Blueprint
-* Publish a Kickstart file referencing the previously built RHEL for Edge image
+* このアーキテクチャの主要なコンポーネントを理解する
+* Blueprint から RHEL for Edge イメージを構築する。
+* 事前にビルドした RHEL for Edge イメージを参照するキックスタート・ファイルを公開する。
 
 ## Prerequisites
 
-The following requirements must be satisfied prior to beginning the walk-through:
+ウォークスルーを開始する前に、以下の要件を満たしている必要があります：
 
-1. OpenShift CLI Tool
-2. Tekton CLI Tool
-3. curl CLI Tool
-4. An OpenShift cluster provisioned with the tooling associated in this repository
-5. Access to the OpenShift cluster as a user with `cluster-admin` privileges.
+1. OpenShift CLI ツール
+2. Tekton CLIツール
+3. curl CLIツール
+4. 本リポジトリに関連するツールでプロビジョニングされたOpenShiftクラスタ
+5. cluster-admin`権限を持つユーザーとして、OpenShiftクラスタにアクセスする。
 
 ## Use Case Overview
 
-This walk-through will illustrate the ease of building, publishing and consuming RHEL for Edge content. For the sample use case, an edge node with the [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) application running in a container will be built and deployed. This process consists of the following:
+このウォークスルーでは、RHEL for Edge コンテンツの構築、公開、消費の容易さを説明します。サンプルのユースケースでは、コンテナで動作する [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) アプリケーションを持つエッジノードを構築し、デプロイする予定です。このプロセスは以下のように構成されています：
 
-* Execute a series of pipelines that:
-  + Use Image Builder to create a custom RHEL for Edge image (OSTree commit) using compose image type `rhel-edge-container`
-  + Push generated OCI container to Quay
-  + Deploy OCI container on OpenShift for staging
-  + Synchronize OStree content from web server running on OpenShift for production promotion
-* Creating a Kickstart file with the configuration to run the container workload
-* Generate auto-booting RHEL for Edge installer ISO with embedded OSTree commit and Kickstart
+* 以下のような一連のパイプラインを実行します：
+  + イメージビルダーを使用して、compose image type `rhel-edge-container` を使用してカスタム RHEL for Edge イメージ (OSTree commit) を作成する。
+  + 生成されたOCIコンテナを岸壁に押し付ける
+  + OpenShiftにOCIコンテナをデプロイしてステージングする。
+  + OpenShift上で動作するWebサーバーからOStreeのコンテンツを同期して本番のプロモーションを行う。
+* コンテナワークロードを実行するための設定を含むキックスタートファイルを作成する。
+* OSTree コミットとキックスタートを組み込んだ自動起動の RHEL for Edge インストーラ ISO を作成する。
+
 
 ## Building a RHEL for Edge Image
 
-The process of building a RHEL for edge image involves composing a Blueprint containing a list of packages, entry modules for packages, as well as any customizations to the resulting image. The architecture includes a Tekton pipeline with the purpose of building an RHEL for Edge image from an existing blueprint. Sample blueprints are found on the [blueprints](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints) branch of this repository.
+RHEL for Edgeイメージの構築プロセスでは、パッケージのリスト、パッケージのエントリモジュール、および結果のイメージに対するカスタマイズを含むブループリントを構成します。このアーキテクチャには、既存のブループリントからRHEL for Edgeイメージを構築することを目的としたTektonパイプラインが含まれています。ブループリントのサンプルは、このリポジトリの [blueprints](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints) ブランチにあります。
 
-For the most basic configurations, a sample [hello-world](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints/hello-world) blueprint is available and provides the necessary configuration to run the containerized application.
+最も基本的な構成については、サンプル [hello-world](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints/hello-world) ブループリントが用意されており、コンテナ化されたアプリケーションを実行するために必要な構成が提供されます。
 
-All of the content for managing RHEL for Edge applications are located in the `rfe` namespace within the OpenShift cluster.
+RHEL for Edgeアプリケーションを管理するためのコンテンツは、すべてOpenShiftクラスタ内の`rfe` namespaceにあります。
 
-Log in to the OpenShift CLI and change into the `rfe` namespace:
+OpenShift CLIにログインして、`rfe` namespaceに変更します：
+
 
 ```shell
 oc project rfe
 ```
 
-The `rfe-oci-image-pipeline` Tekton pipeline is responsible for building new RHEL for Edge images and storing the resulting OCI container with the OSTree Commit in Quay.
+rfe-oci-image-pipeline` Tektonパイプラインは、新しいRHEL for Edgeイメージを構築し、得られたOCIコンテナをQuayのOSTree Commitで保存する役割を担っています。
 
-From the root of the project, execute the following command to execute the `rfe-oci-image-pipeline` pipeline to build the `hello-world` blueprint:
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、 `hello-world` ブループリントをビルドします：
+
 
 ```shell
 oc adm policy add-scc-to-user pipelines-scc -z rfe-automation
@@ -56,29 +59,30 @@ tkn pipeline start rfe-oci-image-pipeline \
 -p blueprint-dir=hello-world 
 ```
 
-To break down the preceding command:
+コマンドの意味は以下のとおりです。
 
 * `tkn` - Tekton CLI
-* `pipeline` - Resource to manage.
-* `start` - Action to perform. Starts a pipeline run.
-* `--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml` - Specifies that a PersistentVolumeClaim should be used to back the Tekton workspace using a template found in the file [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/redhat-cop/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml).
-* `-s rfe-automation` - The name of the Service Account used to run the pipeline.
-* `--use-param-default` - The default Pipeline parameters will be applied unless explicitly specified.
-* `-p blueprint-dir=hello-world` - The directory containing the blueprint file in the cloned repository. By default, the _blueprints_ branch of this repository will be used.
+* `pipeline` - 管理するリソース。
+* `start` - 実行するアクション。パイプラインの実行を開始します。
+* `--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml` - ファイル [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/redhat-cop/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml) にあるテンプレートを使用して Tekton ワークスペースをバックアップするために PersistentVolumeClaim を使用することを指定する。
+* `-s rfe-automation` - パイプラインを実行するために使用するサービスアカウント名です。
+* `--use-param-default` - 明示的に指定しない限り、パイプラインのデフォルトパラメータが適用されます。
+* `-p blueprint-dir=hello-world` - クローンリポジトリのブループリント・ファイルを含むディレクトリです。デフォルトでは、このリポジトリの _blueprints_ ブランチが使用されます。
 
-The output of the command will provide a command to view the progress of the build.
 
-_Note: The process of building a RHEL for Edge image takes time!_
+コマンドの出力には、ビルドの進捗状況を確認するためのコマンドが用意されています。
+
+_Note: RHEL for Edgeイメージの構築プロセスには時間がかかります！_
 
 ### Pipeline Results
 
-Each pipeline run returns three results:
+各パイプラインの実行は、3つの結果を返します：
 
-* `build-commit` - The Build Commit ID from Image Builder
-* `image-path` - Location in Quay registry of OCI container
-* `image-tags` - Tags applied to the container (JSON list)
+* `build-commit` - Image Builder からのビルドコミット ID。
+* `image-path` - OCI コンテナの Quay レジストリ内の位置
+* `image-tags` - コンテナに適用されるタグ（JSONリスト）。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
@@ -86,7 +90,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-image-pipeline-run-2lpwc   1 day ago   13 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
@@ -108,38 +112,38 @@ $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.statu
 
 ### Verification
 
-Once the pipeline completes, the OCI container generated by Image Builder should be stored in Quay. To verify, obtain the route to Quay by running the following command:
+パイプラインが完了すると、Image Builder で生成された OCI コンテナが Quay に格納されているはずです。確認のため、以下のコマンドを実行してQuayへの経路を取得します：
 
 ```shell
 oc get quayregistry quay -n quay -ojsonpath='{.status.registryEndpoint}'
 ```
 
-Quay is not setup to use external authentication, so the username can be found by running:
+Quayは外部認証を使用するように設定されていないので、ユーザー名は実行することで見つけることができます：
 
 ```shell
 oc get secret quay-rfe-setup -n rfe -o go-template='{{ .data.username | base64decode }}'
 ```
-
-And the password by running:
+そして、実行によるパスワード：
 
 ```shell
 oc get secret quay-rfe-setup -n rfe -o go-template='{{ .data.password | base64decode }}'
 ```
 
-Once logged in to Quay, click on the RFE organization to the right of the page under _Users and Organizations_ and then select the repository name associated with your blueprint.
+Quayにログインしたら、ページの右側にある_Users and Organizations_のRFE organizationをクリックし、ブループリントに関連するリポジトリ名を選択します。
 
-To the left of the screen, click the _Tags_ icon to view associated tags. Each pipeline run will create two tags:
+画面の左側にある_Tags_アイコンをクリックすると、関連するタグが表示されます。パイプラインの実行ごとに、2 つのタグが作成されます：
 
-* A _latest_ tag that points to the most recent image.
-* A tag with the version specified in the blueprint.
+* 最も新しいイメージを指す _latest_ タグ。
+最新のイメージを指す _latest_ タグ * ブループリントで指定されたバージョンを示すタグ
 
-At this point, you could manually pull/deploy the container for use in the deployment of RFE content.
+この時点で、RFE コンテンツのデプロイで使用するコンテナを手動でプル/デプロイすることができます。
+
 
 ## Staging OCI Container with OSTree Commit
 
-Now that we have our OCI container from Image Builder with our OSTree Commit in Quay, we can run a pipeline to deploy it as a staging environment in OpenShift.
+さて、QuayでOSTree CommitしたImage BuilderのOCIコンテナができたので、パイプラインを実行してOpenShiftのステージング環境としてデプロイしてみましょう。
 
-From the root of the project, execute the following command to execute the `rfe-oci-stage-pipeline` pipeline to deploy the OCI container built in the previous pipeline (`rfe-oci-image-pipeline`) run.
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-stage-pipeline` パイプラインを実行し、前回のパイプライン (`rfe-oci-image-pipeline`) 実行で構築したOCIコンテナをデプロイします。
 
 ```shell
 tkn pipeline start rfe-oci-stage-pipeline \
@@ -150,18 +154,18 @@ tkn pipeline start rfe-oci-stage-pipeline \
 -p image-tag=latest
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
 
-* `-p image-path=quay-quay-quay.apps.cluster.com/rfe/hello-world` - The path to the OCI container stored in the Quay registry.
-* `-p image-tag=latest` - Use the image with the tag _latest_.
+* `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
+* `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-Each pipeline run returns one result:
+各パイプラインの実行は、1つの結果を返します：
 
-* `content-path` - The path to the OSTree repository.
+* `content-path` - OSTreeのリポジトリへのパスです。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1
@@ -169,7 +173,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-stage-pipeline-run-cxkxq   1 day ago   13 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.status.pipelineResults}'
@@ -183,7 +187,7 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 
 ### Verification
 
-Once the pipeline runs, an ImageStream, Deployment, Service and Route are configured in the `rfe` namespace. To verify the deployment, we can query the hash of the OSTree Commit. Run `curl` using the `content-path` result in the previous `rfe-oci-stage-pipeline` pipeline run and append "/refs/heads/rhel/8/x86_64/edge". For example:
+パイプラインが実行されると、ImageStream、Deployment、Service、Routeが`rfe`名前空間に設定されます。デプロイメントを確認するために、OSTree Commit のハッシュをクエリしてみます。先ほどの `rfe-oci-stage-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、"/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のようになります：
 
 ```
 $ curl http://hello-world-latest-rfe.apps.cluster.com/repo/refs/heads/rhel/8/x86_64/edge
@@ -192,9 +196,9 @@ ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 
 ## Moving from Stage to Production
 
-The next stage involves synchronizing our OSTree Commit from our staging environment to production.
+次の段階では、ステージング環境から本番環境へOSTree Commitを同期させることになります。
 
-From the root of the project, execute the following command to execute the `rfe-oci-publish-content-pipeline` pipeline:
+プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します：
 
 ```shell
 tkn pipeline start rfe-oci-publish-content-pipeline \
@@ -205,18 +209,18 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 -p image-tag=latest 
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
 
-* `-p image-path=quay-quay-quay.apps.cluster.com/rfe/hello-world` - The path to the OCI container stored in the Quay registry.
-* `-p image-tag=latest` - Use the image with the tag _latest_.
+* `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
+* `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-Each pipeline run returns one result:
+各パイプラインの実行は、1つの結果を返します：
 
-* `content-path` - The path to the OSTree repository.
+* `content-path` - OSTreeリポジトリへのパス。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1
@@ -224,7 +228,7 @@ NAME                                         STARTED     DURATION   STATUS
 rfe-oci-publish-content-pipeline-run-ptrpx   1 day ago   1 minute   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpath='{.status.pipelineResults}'
@@ -238,22 +242,22 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 
 ### Verification
 
-Once the pipeline executes, the OSTree Commit is synchronized to the production webserver. Verify the hash by running the following command:
+パイプラインが実行されると、OSTree Commitは本番のWebサーバーに同期されます。以下のコマンドを実行して、ハッシュを確認します：
 
-Run `curl` using the `content-path` result in the previous `rfe-oci-publish-content-pipeline` pipeline run and append "/refs/heads/rhel/8/x86_64/edge". For example:
+前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 "/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のような感じです：
 
 ```shell
 $ curl http://httpd-rfe.apps.cluster.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
 ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 ```
 
-The hash for this repository should now match the hash from the repository generated during the `rfe-oci-stage-pipeline` pipeline run.
+このリポジトリのハッシュは、`rfe-oci-stage-pipeline`パイプラインの実行中に生成されたリポジトリのハッシュと一致するようになりました。
 
 ## Creating the Kickstart File
 
-A Tekton pipeline called `rfe-kickstart-pipeline` is responsible for publishing a Kickstart file to both Nexus and the HTTPD server. As the pipeline uses Ansible, Jinja based templating is available to inject key values (in particular, the location of the OSTree repository).
+rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担っています。パイプラインはAnsibleを使用しているため、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
 
-Using the location of the OSTree repository from the results of either the `rfe-oci-stage-pipeline` or `rfe-oci-publish-content-pipeline` pipelines, execute the following command:
+rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します：
 
 ```shell
 tkn pipeline start rfe-kickstart-pipeline \
@@ -264,23 +268,23 @@ tkn pipeline start rfe-kickstart-pipeline \
 -p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
 
-To break down the preceding command:
+前のコマンドを分解すると
 
-* `-p kickstart-path=ibm-weather-forecaster/kickstart.ks` - The location of the kickstart to use in the referenced repository. By default, the _kickstarts_ branch of this repository will be used.
-* `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest` - The location of the OSTree repository.
+* `-p kickstart-path=ibm-weather-forecaster/kickstart.ks` - 参照されるリポジトリで使用するキックスタートの場所です。デフォルトでは、このリポジトリの _kickstarts_ ブランチが使用されます。
+* `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest` - OSTree リポジトリの場所です。
 
-The output of the `tkn pipeline` command will provide another command to view the progress of the build.
+tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別のコマンドを提供します。
 
 ### Pipeline Results
 
-Each pipeline run returns two results:
+各パイプラインの実行は、2つの結果を返します：
 
-* `artifact-repository-storage-url` - The location of the kickstart on the Nexus server.
-* `serving-storage-url` - The location of the kickstart on the HTTPD server.
+* Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
+* `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
@@ -288,7 +292,7 @@ NAME                               STARTED          DURATION   STATUS
 rfe-kickstart-pipeline-run-kqp5n   18 minutes ago   1 minute   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipelineResults}'
@@ -306,13 +310,13 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipel
 
 ### Verification
 
-To verify, simply pull the kickstart files using the URLs defined in the `artifact-repository-storage-url` and `serving-storage-url` pipeline results.
+検証するには、`artifact-repository-storage-url` と `serving-storage-url` パイプラインの結果で定義された URL を使用してキックスタートファイルを引き出すだけです。
 
 ## Creating Auto Booting RFE Installer
 
-One of the new features in Image Builder 8.4 is the ability to compose (using `image-type` `rhel-edge-installer`) installation media that has an OSTree commit embedded in the installer. The pipeline in this project goes a step further and embeds a kickstart file in the generated ISO and reconfigures `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` to automatically install RFE using the embedded kickstart.
+Image Builder 8.4 の新機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
 
-From the root of the project, execute the following command to execute the `rfe-oci-iso-pipeline` pipeline:
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します：
 
 ```shell
 tkn pipeline start rfe-oci-iso-pipeline \
@@ -323,35 +327,35 @@ tkn pipeline start rfe-oci-iso-pipeline \
 -p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
 
-* `-p kickstart-url=https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks` - The path to the kickstart to be embedded in the ISO.
-* `-p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo` - The path to the OSTree repository that will be embedded in the ISO.
+* `-p キックスタート-url=https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks` - ISO に埋め込まれるキックスタートへのパス。
+* `-p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
 ### Important Information Regarding Kickstarts
 
-If you are providing your own kickstart file, the following line for the `ostreesetup` command should be used (notice `--url` is pointing to the OSTree repo embedded in the installer, but it can point to any OSTree repository):
+独自のキックスタートファイルを用意する場合は、`ostreesetup`コマンドの以下の行を使用します（`--url`はインストーラに組み込まれているOSTreeリポジトリを指していますが、任意のOSTreeリポジトリを指すことができることに注意してください）：
 
 ```shell
 ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref=rhel/8/x86_64/edge
 ```
 
-Like traditional RHEL installations, Anaconda is used to install RHEL for Edge. However, not all Anaconda modules are enabled. The following modules are available:
+従来のRHELのインストールと同様に、AnacondaはRHEL for Edgeのインストールに使用されます。ただし、すべてのAnacondaモジュールが有効になっているわけではありません。利用可能なモジュールは以下の通りです：
 
 * org.fedoraproject.Anaconda.Modules.Network
 * org.fedoraproject.Anaconda.Modules.Payloads
-* org.fedoraproject.Anaconda.Modules.Storage
+* org.fedoraproject.Anaconda.Modules.Storage を参照してください。
 
-Common tasks like creating a user via the kickstart will not work. These actions should be included in the blueprint file used to build the OSTree commit. However, other tasks like `%post` should still work.
+キックスタートによるユーザー作成などの一般的なタスクは機能しません。これらのアクションは、OSTree のコミットを構築するために使用するブループリント ファイルに含める必要があります。しかし、`%post` のような他のタスクはまだ動作するはずです。
 
 ### Pipeline Results
 
-Each pipeline run returns two results:
+各パイプラインの実行は、2つの結果を返します：
 
-* `build-commit-id` - The Build Commit ID from Image Builder
-* `iso-url` - The location of the autobooting ISO
+* `build-commit-id` - Image Builder からのビルドコミット ID。
+* `iso-url` - オートブートするISOの場所。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1
@@ -359,7 +363,7 @@ NAME                             STARTED      DURATION     STATUS
 rfe-oci-iso-pipeline-run-2lpwc   3 days ago   13 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
@@ -377,45 +381,45 @@ $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.
 
 ### Verification
 
-To verify, simply pull the ISO using the URL defined in the `iso-url` pipeline result.
+検証するには、`iso-url`パイプラインの結果で定義されたURLを使ってISOを引き出すだけです。
 
 ## Creating a RHEL for Edge Node
 
 ### Using Auto Booting ISO
 
-The auto booting ISO is self contained and configured to automatically install the RHEL for Edge not w/o user input. Simply boot off the ISO to install.
+自動起動するISOは、RHEL for Edgeを自動的にインストールするように構成されており、ユーザーの入力は必要ありません。ISOを起動するだけで、インストールできます。
 
 ### Manually Using Kickstart File
 
-Now that the the Kickstart and OSTree repository are setup, create a new RHEL for Edge Node by booting a new machine using the RHEL 8 boot image.
+キックスタートと OSTree リポジトリがセットアップされたので、RHEL 8 ブートイメージを使用して新しいマシンをブートして、Edge Node 用の新しい RHEL を作成します。
 
-At the boot menu, hit the tab key and add the following to the list of boot arguments:
+ブートメニューで、タブキーを押し、ブート引数のリストに以下を追加します：
 
 ```shell
 inst.ks=<URL_OF_KICKSTART_FILE>
 ```
 
-Hit enter to boot the machine using the Kickstart. The machine will retrieve the OSTree content and prepare the machine to run the sample application. Once complete, the machine will reboot
+Enter を押して、キックスタートを使用してマシンを起動します。マシンはOSTreeのコンテンツを取得し、サンプルアプリケーションを実行するための準備をします。完了すると、マシンは再起動します
 
 ### Verify the Application
 
-Once the machine has been rebooted, login as the user created as part of the node installation.
+マシンが再起動したら、ノードのインストールの一部として作成されたユーザーでログインします。
 
-_Note: By default, this example specifies the following `core` as the user and `edge` as the password._
+_Note: この例では、デフォルトで、ユーザとして以下の `core` を、パスワードとして `edge` を指定しています。_
 
-Once logged in, confirm the application container is running:
+ログインしたら、アプリケーションコンテナが起動していることを確認します：
 
 ```shell
 sudo podman ps
 ```
 
-Finally, confirm that the application Swagger endpoint responds to requests:
+最後に、アプリケーションのSwaggerエンドポイントがリクエストに応答することを確認します：
 
 ```shell
 curl localhost:5000
 ```
 
-Additional details on interacting with the application can be found in the [project repository](https://github.com/IBM/MAX-Weather-Forecaster)
+アプリケーションとの対話に関するその他の詳細は、[プロジェクトリポジトリ](https://github.com/IBM/MAX-Weather-Forecaster)に記載されています。
 
-You have now successfully completed the walkthrough!
+これで、ウォークスルーは成功です！
 

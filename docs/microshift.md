@@ -1,33 +1,34 @@
 # MicroShift Example
 
-Before using this guide, you should run through the [Basic Walkthrough](/docs/basic-walkthrough.md) to get familiar with the mechanics of building an RFE image using this project.
+このガイドを使用する前に、[Basic Walkthrough](/docs/basic-walkthrough.md) を実行して、このプロジェクトを使用して RFE イメージを構築する仕組みに慣れておくとよいでしょう。
 
 ## Prerequisites
 
-The following requirements must be satisfied prior to beginning the example:
+例題を始める前に、以下の要件を満たしている必要があります：
 
-1. OpenShift CLI Tool
-2. Tekton CLI Tool
-3. curl CLI Tool
-4. jq CLI Tool
-5. An OpenShift cluster provisioned with the tooling associated in this repository
-6. Access to the OpenShift cluster as a user with `cluster-admin` privileges.
+1. OpenShift CLI ツール
+2. Tekton CLIツール
+3. curl CLIツール
+4. jq CLIツール
+5. 本リポジトリで関連するツールでプロビジョニングされたOpenShiftクラスタ
+6. cluster-admin`権限を持つユーザーとしてOpenShiftクラスタにアクセスできること。
 
-This build will use the MicroShift blueprint hosted in our repository in the `blueprints` branch [here](https://github.com/redhat-cop/rhel-edge-automation-arch/blob/blueprints/microshift/blueprint.toml). It has all of the packages required to run MicroShift as well as an initial user called `redhat` with the same password.
+このビルドでは、私たちのリポジトリの `blueprints` ブランチ [ここ](https://github.com/redhat-cop/rhel-edge-automation-arch/blob/blueprints/microshift/blueprint.toml) にホストされている MicroShift ブループリントを使用します。これは、MicroShiftの実行に必要なすべてのパッケージと、同じパスワードを持つ`redhat`という初期ユーザーを備えています。
+
 
 ### Updating Default Password
 
-For more secure installations, it is recommended you modify the blueprint and update the password hash. Using the following command to generate a new hash:
+より安全なインストールを行うには、ブループリントを修正し、パスワードハッシュを更新することをお勧めします。次のコマンドを使用して、新しいハッシュを生成します：
 
 ```shell
 openssl passwd -6
 ```
 
-Replace the hash in the `password` parameter of `customizations.user` with the hash generated above.
+customizations.user`の`password`パラメータのハッシュを、上記で生成したハッシュで置き換える。
 
 ### Additional Content Sources
 
-Create a file called `/tmp/microshift-additional-sources.json` with the following contents:
+以下の内容で `/tmp/microshift-additional-sources.json` というファイルを作成します：
 
 ```json
 {
@@ -56,17 +57,17 @@ Create a file called `/tmp/microshift-additional-sources.json` with the followin
 }
 ```
 
-This file contains the additional content sources Image Builder will need to install MicroShift RPMs and associated dependencies.
+このファイルには、MicroShift RPM と関連する依存関係をインストールするために Image Builder が必要とする追加のコンテンツソースが含まれています。
 
 ## Building a MicroShift Image
 
-Log in to the OpenShift CLI and change into the `rfe` namespace:
+OpenShift CLIにログインし、`rfe`ネームスペースに変更します：
 
 ```shell
 oc project rfe
 ```
 
-From the root of the project, execute the following command to execute the `rfe-oci-image-pipeline` pipeline to build the `microshift` blueprint:
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、`microshift` ブループリントをビルドします：
 
 ```shell
 tkn pipeline start rfe-oci-image-pipeline \
@@ -79,22 +80,23 @@ tkn pipeline start rfe-oci-image-pipeline \
      -p additional-content-sources='$(jq -c . /tmp/microshift-additional-sources.json | base64 -w0)'
 ```
 
-If you updated the blueprint and saved it in your own git repository, change the  blueprint parameters to match your repository.
+ブループリントを更新して自分のgitリポジトリに保存した場合は、ブループリントのパラメータを自分のリポジトリに合わせて変更します。
 
-The output of the `tkn` command will display another command to view the progress of the build.
+tkn`コマンドの出力には、ビルドの進捗を確認するための別のコマンドが表示されます。
 
-_Note: The process of building a image takes time.
+_Note: イメージの構築作業には時間がかかります。
 
 ### Pipeline Results
 
-Each pipeline run returns four results:
+各パイプラインの実行は、4つの結果を返します：
 
-* `build-commit` - The Build Commit ID from Image Builder
-* `image-builder-host` - The Image Builder host used during pipeline execution
-* `image-path` - Location in Quay registry of OCI container`
-* `image-tags` - Tags applied to the container (JSON list)
+* `build-commit` - Image Builder からのビルドコミット ID。
+* `image-builder-host` - パイプラインの実行時に使用される Image Builder のホストです．
+* `image-path` - OCIコンテナのQuayレジストリ内の位置`。
+* `image-tags` - コンテナに適用されるタグ（JSONリスト）。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
@@ -102,7 +104,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-image-pipeline-run-g8hzp   1 day ago   16 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-g8hzp -ojsonpath='{.status.pipelineResults}'
@@ -128,9 +130,9 @@ $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-g8hzp -ojsonpath='{.statu
 
 ## Staging OCI Container with OSTree Commit
 
-Now that we have our OCI container from Image Builder with our OSTree Commit in Quay, we can run a pipeline to deploy it as a staging environment in OpenShift.
+さて、QuayでOSTree CommitしたImage BuilderのOCIコンテナができたので、パイプラインを実行してOpenShiftのステージング環境としてデプロイしてみましょう。
 
-From the root of the project, execute the following command to execute the `rfe-oci-stage-pipeline` pipeline to deploy the OCI container built in the previous pipeline (`rfe-oci-image-pipeline`) run.
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-stage-pipeline` パイプラインを実行し、前回のパイプライン (`rfe-oci-image-pipeline`) 実行で構築したOCIコンテナをデプロイします。
 
 ```shell
 tkn pipeline start rfe-oci-stage-pipeline \
@@ -141,18 +143,18 @@ tkn pipeline start rfe-oci-stage-pipeline \
 -p image-tag=latest
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
 
-* `-p image-path=quay-quay-quay.apps.cluster.com/rfe/microshift` - The path to the OCI container stored in the Quay registry.
-* `-p image-tag=latest` - Use the image with the tag _latest_.
+* `-p image-path=quay-quay.apps.cluster.com/rfe/microshift` - Quayレジストリに保存されているOCIコンテナのパスです。
+* `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-Each pipeline run returns one result:
+各パイプラインの実行は、1つの結果を返します：
 
-* `content-path` - The path to the OSTree repository.
+* `content-path` - OSTreeリポジトリへのパス。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1
@@ -160,7 +162,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-stage-pipeline-run-cxkxq   1 day ago   13 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.status.pipelineResults}'
@@ -174,9 +176,9 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 
 ## Moving from Stage to Production
 
-The next stage involves synchronizing our OSTree Commit from our staging environment to production.
+次の段階では、ステージング環境から本番環境へOSTree Commitを同期させることになります。
 
-From the root of the project, execute the following command to execute the `rfe-oci-publish-content-pipeline` pipeline:
+プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します：
 
 ```shell
 tkn pipeline start rfe-oci-publish-content-pipeline \
@@ -187,18 +189,18 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 -p image-tag=latest 
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
 
-* `-p image-path=quay-quay-quay.apps.cluster.com/rfe/microshift` - The path to the OCI container stored in the Quay registry.
-* `-p image-tag=latest` - Use the image with the tag _latest_.
+* `-p image-path=quay-quay.apps.cluster.com/rfe/microshift` - Quayレジストリに保存されているOCIコンテナのパスです。
+* `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-Each pipeline run returns one result:
+各パイプラインの実行は、1つの結果を返します：
 
-* `content-path` - The path to the OSTree repository.
+* `content-path` - OSTreeリポジトリへのパス。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1
@@ -206,7 +208,7 @@ NAME                                         STARTED     DURATION   STATUS
 rfe-oci-publish-content-pipeline-run-ptrpx   1 day ago   1 minute   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpath='{.status.pipelineResults}'
@@ -220,9 +222,9 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 
 ## Creating the Kickstart File
 
-A Tekton pipeline called `rfe-kickstart-pipeline` is responsible for publishing a Kickstart file to both Nexus and the HTTPD server. As the pipeline uses Ansible, Jinja based templating is available to inject key values (in particular, the location of the OSTree repository).
+rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担っています。パイプラインはAnsibleを使用しているため、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
 
-Using the location of the OSTree repository from the results of either the `rfe-oci-stage-pipeline` or `rfe-oci-publish-content-pipeline` pipelines, execute the following command:
+rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します：
 
 ```shell
 tkn pipeline start rfe-kickstart-pipeline \
@@ -233,23 +235,23 @@ tkn pipeline start rfe-kickstart-pipeline \
 -p ostree-repo-url=file:///run/install/repo/ostree/repo
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
 
-To break down the preceding command:
+前のコマンドを分解すると
 
-* `-p kickstart-path=microshift/kickstart.ks` - The location of the kickstart to use in the referenced repository. By default, the _kickstarts_ branch of this repository will be used.
-* `-p ostree-repo-url=file:///run/install/repo/ostree/repo` - The location of the OSTree repository. This kickstart will be embedded in the installer image during the next pipeline run, so the OSTree repository will be local to the ISO.
+* `-p kickstart-path=microshift/kickstart.ks` - 参照されるリポジトリで使用するキックスタートの場所です。デフォルトでは、このリポジトリの _kickstarts_ ブランチが使用されます。
+* `-p ostree-repo-url=file:///run/install/repo/ostree/repo` - OSTree リポジトリの場所です。このキックスタートは次のパイプライン実行時にインストーライメージに埋め込まれるため、OSTree リポジトリは ISO のローカルとなります。
 
-The output of the `tkn pipeline` command will provide another command to view the progress of the build.
+tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別のコマンドを提供します。
 
 ### Pipeline Results
 
-Each pipeline run returns two results:
+各パイプラインの実行は、2つの結果を返します：
 
-* `artifact-repository-storage-url` - The location of the kickstart on the Nexus server.
-* `serving-storage-url` - The location of the kickstart on the HTTPD server.
+* Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
+* `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
@@ -257,7 +259,7 @@ NAME                               STARTED          DURATION   STATUS
 rfe-kickstart-pipeline-run-kqp5n   18 minutes ago   1 minute   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipelineResults}'
@@ -275,9 +277,9 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipel
 
 ## Creating Auto Booting RFE Installer
 
-One of the new features in Image Builder 8.4 is the ability to compose (using `image-type` `rhel-edge-installer`) installation media that has an OSTree commit embedded in the installer. The pipeline in this project goes a step further and embeds a kickstart file in the generated ISO and reconfigures `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` to automatically install RFE using the embedded kickstart.
+Image Builder 8.4 の新機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
 
-From the root of the project, execute the following command to execute the `rfe-oci-iso-pipeline` pipeline:
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します：
 
 ```shell
 tkn pipeline start rfe-oci-iso-pipeline \
@@ -288,20 +290,20 @@ tkn pipeline start rfe-oci-iso-pipeline \
 -p ostree-repo-url=http://httpd-rfe.apps.cluster.com/microshift/latest
 ```
 
-This command is similar to the previous pipeline run, but the following parameters are used:
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
 
-* `-p kickstart-url=https://httpd-rfe.apps.cluster.com/kickstarts/microshift/kickstart.ks` - The path to the kickstart to be embedded in the ISO.
-* `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/microshift/latest` - The path to the OSTree repository that will be embedded in the ISO.
+* `-p キックスタート-url=https://httpd-rfe.apps.cluster.com/kickstarts/microshift/kickstart.ks` - ISO に埋め込まれるキックスタートへのパス。
+* `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/microshift/latest` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
 ### Pipeline Results
 
-Each pipeline run returns two results:
+各パイプラインの実行は、2つの結果を返します：
 
-* `build-commit-id` - The Build Commit ID from Image Builder
-* `image-builder-host` - The Image Builder host used during pipeline execution
-* `iso-url` - The location of the autobooting ISO
+* `build-commit-id` - Image Builder からのビルドコミット ID。
+* パイプラインの実行時に使用される Image Builder のホストです．
+* `iso-url` - オートブートするISOの場所。
 
-To view the results, find the latest pipeline run. Use the following command as an example:
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1
@@ -309,7 +311,7 @@ NAME                             STARTED      DURATION     STATUS
 rfe-oci-iso-pipeline-run-2lpwc   3 days ago   13 minutes   Succeeded
 ```
 
-Then run the following to view the pipeline results:
+次に以下を実行すると、パイプラインの結果が表示されます：
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
@@ -331,4 +333,4 @@ $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.
 
 ## Deploying
 
-Once the ISO pipeline finishes, simply pull the ISO linked in the `iso-url` result and boot it on a new system. Once the ISO boots it should automatically begin the installation without any prompts.
+ISO パイプラインが終了したら、`iso-url` の結果でリンクされている ISO を引っ張り出して、新しいシステムで起動させるだけです。ISOが起動すると、プロンプトなしで自動的にインストールが開始されるはずです。
