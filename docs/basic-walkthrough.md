@@ -244,7 +244,7 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 
 パイプラインが実行されると、OSTree Commitは本番のWebサーバーに同期されます。以下のコマンドを実行して、ハッシュを確認します。
 
-前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 "/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のような感じです。
+前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 `/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のような感じです。
 
 ```shell
 $ curl http://httpd-rfe.apps.cluster.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
