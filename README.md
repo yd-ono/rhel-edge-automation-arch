@@ -37,7 +37,7 @@ git clone https://github.com/yd-ono/rhel-edge-automation-arch.git
 
 ### SSHキーペアとRed Hatポータルの認証情報の設定
 
-| コンポーネント | 説明 | Right-aligned |
+| コンポーネント | 説明 |
 | :---         | :---         |
 | SSHキー   | Image Builder VMへSSHするために使用   |
 | Red Hat Portalのユーザー名     | Image Builder VMをサブスクリプションへ登録するためのユーザー名     |
