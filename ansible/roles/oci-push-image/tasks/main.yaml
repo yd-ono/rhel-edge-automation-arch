@@ -81,6 +81,11 @@
   become: no
   delegate_to: localhost
 
+- name: Change Target File Permissions
+  ansible.builtin.file:
+    path: "{{ find_results.files[0].path }}"
+    mode: 0644
+
 - name: Fetch RFE Build tar
   become: no
   ansible.builtin.fetch:
