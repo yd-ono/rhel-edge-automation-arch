@@ -90,26 +90,32 @@ rhsm:
     username: "alice"
 ```
 
-offlineToken`、`poolId`、`username`、`password`の値は、必ず自分のアカウントの詳細と一致するように変更してください。Red Hat API のオフライントークンの生成方法がわからない場合は、[こちら](https://access.redhat.com/articles/3626371#bgenerating-a-new-offline-tokenb-3) にドキュメントがあります。
+`offlineToken`、`poolId`、`username`、`password`の値は、必ず自分のアカウントの詳細と一致するように変更してください。Red Hat API のオフライントークンの生成方法がわからない場合は、[こちら](https://access.redhat.com/articles/3626371#bgenerating-a-new-offline-tokenb-3) にドキュメントがあります。
 
-#### OpenShift GitOps OperatorとArgo CDのデプロイ
+#### AWSのベアメタルインスタンスを追加
+Workerノードとして、AWSのベアメタルインスタンスを追加します。
 
-SSHキーペアと値ファイルが揃ったら、デプロイを開始します。以下のスクリプトを実行し、OpenShift GitOps OperatorとArgo CDをインストールします。
+```shell
+oc apply -f machine-bm.yaml
+```
+
+#### OpenShift GitOps Operatorのデプロイ
+
+以下のスクリプトを実行し、OpenShift GitOps Operatorをインストールします。
 
 ```shell
 ./setup/init.sh
 ```
 
-
 ### デプロイメント
 
-空のOpenShiftクラスタに参照環境をデプロイするには、以下のコマンドを実行します：
+ArgoCDが`chart`ディレクトリ配下の各Helmチャートを参照するように更新します。
 
 ```shell
 helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ -f examples/values/local/bootstrap.yaml -f examples/values/deployment/default.yaml
 ```
 
-デフォルトのインストールでは、クラスタ上のすべての管理対象コンポーネントのデプロイと構成が行われます。HTPasswdのIDプロバイダは、パスワードにopenshiftを指定した5人のユーザー（user{1-5}）に対して設定されます。
+デフォルトのインストールでは、クラスタ上のすべての管理対象コンポーネントのデプロイと構成が行われます。HTPasswdのIDプロバイダは、パスワードに`openshift`を指定した5人のユーザー（user{1-5}）に対して設定されます。
 
 Argo CD のダッシュボードでデプロイの進捗を確認することができます。URL を取得するには、以下のコマンドを実行します：
 
@@ -123,6 +129,16 @@ oc get route argocd-server -n rfe-gitops -ojsonpath='https://{.spec.host}'
 $ oc get application rfe-automation -n rfe-gitops
 NAME             SYNC STATUS   HEALTH STATUS
 rfe-automation   Synced        Healthy
+```
+
+### Tekton Configを変更
+`rfe-oci-push-image` Taskのpipeline.resultのタイプを`array`としているため、Tektonの`enable-api-fields`を`alpha`へ変更してください。
+
+```shell
+oc edit tektonconfig
+...
+    enable-api-fields: alpha
+...
 ```
 
 ## デプロイメントをカスタマイズする

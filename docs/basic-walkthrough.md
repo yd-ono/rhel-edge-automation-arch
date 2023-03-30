@@ -1,6 +1,6 @@
 # Basic Walkthrough
 
-このガイドでは、このアーキテクチャを使用して最初の RHEL for Edge イメージを構築するプロセスについて説明します。このガイドでは、以下のことを学びます：
+このガイドでは、このアーキテクチャを使用して最初の RHEL for Edge イメージを構築するプロセスについて説明します。このガイドでは、以下のことを学びます。
 
 * このアーキテクチャの主要なコンポーネントを理解する
 * Blueprint から RHEL for Edge イメージを構築する。
@@ -8,7 +8,7 @@
 
 ## Prerequisites
 
-ウォークスルーを開始する前に、以下の要件を満たしている必要があります：
+ウォークスルーを開始する前に、以下の要件を満たしている必要があります。
 
 1. OpenShift CLI ツール
 2. Tekton CLIツール
@@ -18,9 +18,9 @@
 
 ## Use Case Overview
 
-このウォークスルーでは、RHEL for Edge コンテンツの構築、公開、消費の容易さを説明します。サンプルのユースケースでは、コンテナで動作する [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) アプリケーションを持つエッジノードを構築し、デプロイする予定です。このプロセスは以下のように構成されています：
+このウォークスルーでは、RHEL for Edge コンテンツの構築、公開、消費の容易さを説明します。サンプルのユースケースでは、コンテナで動作する [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) アプリケーションを持つエッジノードを構築し、デプロイする予定です。このプロセスは以下のように構成されています。
 
-* 以下のような一連のパイプラインを実行します：
+* 以下のような一連のパイプラインを実行します。
   + イメージビルダーを使用して、compose image type `rhel-edge-container` を使用してカスタム RHEL for Edge イメージ (OSTree commit) を作成する。
   + 生成されたOCIコンテナを岸壁に押し付ける
   + OpenShiftにOCIコンテナをデプロイしてステージングする。
@@ -37,7 +37,7 @@ RHEL for Edgeイメージの構築プロセスでは、パッケージのリス�
 
 RHEL for Edgeアプリケーションを管理するためのコンテンツは、すべてOpenShiftクラスタ内の`rfe` namespaceにあります。
 
-OpenShift CLIにログインして、`rfe` namespaceに変更します：
+OpenShift CLIにログインして、`rfe` namespaceに変更します。
 
 
 ```shell
@@ -46,7 +46,7 @@ oc project rfe
 
 rfe-oci-image-pipeline` Tektonパイプラインは、新しいRHEL for Edgeイメージを構築し、得られたOCIコンテナをQuayのOSTree Commitで保存する役割を担っています。
 
-プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、 `hello-world` ブループリントをビルドします：
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、 `hello-world` ブループリントをビルドします。
 
 
 ```shell
@@ -76,13 +76,13 @@ _Note: RHEL for Edgeイメージの構築プロセスには時間がかかりま
 
 ### Pipeline Results
 
-各パイプラインの実行は、3つの結果を返します：
+各パイプラインの実行は、3つの結果を返します。
 
 * `build-commit` - Image Builder からのビルドコミット ID。
 * `image-path` - OCI コンテナの Quay レジストリ内の位置
 * `image-tags` - コンテナに適用されるタグ（JSONリスト）。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
@@ -90,7 +90,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-image-pipeline-run-2lpwc   1 day ago   13 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
@@ -112,18 +112,18 @@ $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.statu
 
 ### Verification
 
-パイプラインが完了すると、Image Builder で生成された OCI コンテナが Quay に格納されているはずです。確認のため、以下のコマンドを実行してQuayへの経路を取得します：
+パイプラインが完了すると、Image Builder で生成された OCI コンテナが Quay に格納されているはずです。確認のため、以下のコマンドを実行してQuayへの経路を取得します。
 
 ```shell
 oc get quayregistry quay -n quay -ojsonpath='{.status.registryEndpoint}'
 ```
 
-Quayは外部認証を使用するように設定されていないので、ユーザー名は実行することで見つけることができます：
+Quayは外部認証を使用するように設定されていないので、ユーザー名は実行することで見つけることができます。
 
 ```shell
 oc get secret quay-rfe-setup -n rfe -o go-template='{{ .data.username | base64decode }}'
 ```
-そして、実行によるパスワード：
+そして、実行によるパスワード。
 
 ```shell
 oc get secret quay-rfe-setup -n rfe -o go-template='{{ .data.password | base64decode }}'
@@ -131,7 +131,7 @@ oc get secret quay-rfe-setup -n rfe -o go-template='{{ .data.password | base64de
 
 Quayにログインしたら、ページの右側にある_Users and Organizations_のRFE organizationをクリックし、ブループリントに関連するリポジトリ名を選択します。
 
-画面の左側にある_Tags_アイコンをクリックすると、関連するタグが表示されます。パイプラインの実行ごとに、2 つのタグが作成されます：
+画面の左側にある_Tags_アイコンをクリックすると、関連するタグが表示されます。パイプラインの実行ごとに、2 つのタグが作成されます。
 
 * 最も新しいイメージを指す _latest_ タグ。
 最新のイメージを指す _latest_ タグ * ブループリントで指定されたバージョンを示すタグ
@@ -154,18 +154,18 @@ tkn pipeline start rfe-oci-stage-pipeline \
 -p image-tag=latest
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます。
 
 * `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-各パイプラインの実行は、1つの結果を返します：
+各パイプラインの実行は、1つの結果を返します。
 
 * `content-path` - OSTreeのリポジトリへのパスです。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1
@@ -173,7 +173,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-stage-pipeline-run-cxkxq   1 day ago   13 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.status.pipelineResults}'
@@ -187,7 +187,7 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 
 ### Verification
 
-パイプラインが実行されると、ImageStream、Deployment、Service、Routeが`rfe`名前空間に設定されます。デプロイメントを確認するために、OSTree Commit のハッシュをクエリしてみます。先ほどの `rfe-oci-stage-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、"/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のようになります：
+パイプラインが実行されると、ImageStream、Deployment、Service、Routeが`rfe`名前空間に設定されます。デプロイメントを確認するために、OSTree Commit のハッシュをクエリしてみます。先ほどの `rfe-oci-stage-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、`/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のようになります。
 
 ```
 $ curl http://hello-world-latest-rfe.apps.cluster.com/repo/refs/heads/rhel/8/x86_64/edge
@@ -198,7 +198,7 @@ ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 
 次の段階では、ステージング環境から本番環境へOSTree Commitを同期させることになります。
 
-プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します：
+プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します。
 
 ```shell
 tkn pipeline start rfe-oci-publish-content-pipeline \
@@ -209,18 +209,18 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 -p image-tag=latest 
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます。
 
 * `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-各パイプラインの実行は、1つの結果を返します：
+各パイプラインの実行は、1つの結果を返します。
 
 * `content-path` - OSTreeリポジトリへのパス。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1
@@ -228,7 +228,7 @@ NAME                                         STARTED     DURATION   STATUS
 rfe-oci-publish-content-pipeline-run-ptrpx   1 day ago   1 minute   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpath='{.status.pipelineResults}'
@@ -242,9 +242,9 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 
 ### Verification
 
-パイプラインが実行されると、OSTree Commitは本番のWebサーバーに同期されます。以下のコマンドを実行して、ハッシュを確認します：
+パイプラインが実行されると、OSTree Commitは本番のWebサーバーに同期されます。以下のコマンドを実行して、ハッシュを確認します。
 
-前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 "/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のような感じです：
+前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 "/refs/heads/rhel/8/x86_64/edge" を追記します。例えば、以下のような感じです。
 
 ```shell
 $ curl http://httpd-rfe.apps.cluster.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
@@ -257,7 +257,7 @@ ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 
 rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担っています。パイプラインはAnsibleを使用しているため、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
 
-rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します：
+rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します。
 
 ```shell
 tkn pipeline start rfe-kickstart-pipeline \
@@ -268,7 +268,7 @@ tkn pipeline start rfe-kickstart-pipeline \
 -p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
 前のコマンドを分解すると
 
@@ -279,12 +279,12 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 
 ### Pipeline Results
 
-各パイプラインの実行は、2つの結果を返します：
+各パイプラインの実行は、2つの結果を返します。
 
 * Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
 * `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
@@ -292,7 +292,7 @@ NAME                               STARTED          DURATION   STATUS
 rfe-kickstart-pipeline-run-kqp5n   18 minutes ago   1 minute   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipelineResults}'
@@ -316,7 +316,7 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipel
 
 Image Builder 8.4 の新機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
 
-プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します：
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します。
 
 ```shell
 tkn pipeline start rfe-oci-iso-pipeline \
@@ -327,20 +327,20 @@ tkn pipeline start rfe-oci-iso-pipeline \
 -p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
 * `-p キックスタート-url=https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks` - ISO に埋め込まれるキックスタートへのパス。
 * `-p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
 ### Important Information Regarding Kickstarts
 
-独自のキックスタートファイルを用意する場合は、`ostreesetup`コマンドの以下の行を使用します（`--url`はインストーラに組み込まれているOSTreeリポジトリを指していますが、任意のOSTreeリポジトリを指すことができることに注意してください）：
+独自のキックスタートファイルを用意する場合は、`ostreesetup`コマンドの以下の行を使用します（`--url`はインストーラに組み込まれているOSTreeリポジトリを指していますが、任意のOSTreeリポジトリを指すことができることに注意してください）。
 
 ```shell
 ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref=rhel/8/x86_64/edge
 ```
 
-従来のRHELのインストールと同様に、AnacondaはRHEL for Edgeのインストールに使用されます。ただし、すべてのAnacondaモジュールが有効になっているわけではありません。利用可能なモジュールは以下の通りです：
+従来のRHELのインストールと同様に、AnacondaはRHEL for Edgeのインストールに使用されます。ただし、すべてのAnacondaモジュールが有効になっているわけではありません。利用可能なモジュールは以下の通りです。
 
 * org.fedoraproject.Anaconda.Modules.Network
 * org.fedoraproject.Anaconda.Modules.Payloads
@@ -350,12 +350,12 @@ ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref
 
 ### Pipeline Results
 
-各パイプラインの実行は、2つの結果を返します：
+各パイプラインの実行は、2つの結果を返します。
 
 * `build-commit-id` - Image Builder からのビルドコミット ID。
 * `iso-url` - オートブートするISOの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1
@@ -363,7 +363,7 @@ NAME                             STARTED      DURATION     STATUS
 rfe-oci-iso-pipeline-run-2lpwc   3 days ago   13 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
@@ -393,7 +393,7 @@ $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.
 
 キックスタートと OSTree リポジトリがセットアップされたので、RHEL 8 ブートイメージを使用して新しいマシンをブートして、Edge Node 用の新しい RHEL を作成します。
 
-ブートメニューで、タブキーを押し、ブート引数のリストに以下を追加します：
+ブートメニューで、タブキーを押し、ブート引数のリストに以下を追加します。
 
 ```shell
 inst.ks=<URL_OF_KICKSTART_FILE>
@@ -407,13 +407,13 @@ Enter を押して、キックスタートを使用してマシンを起動し�
 
 _Note: この例では、デフォルトで、ユーザとして以下の `core` を、パスワードとして `edge` を指定しています。_
 
-ログインしたら、アプリケーションコンテナが起動していることを確認します：
+ログインしたら、アプリケーションコンテナが起動していることを確認します。
 
 ```shell
 sudo podman ps
 ```
 
-最後に、アプリケーションのSwaggerエンドポイントがリクエストに応答することを確認します：
+最後に、アプリケーションのSwaggerエンドポイントがリクエストに応答することを確認します。
 
 ```shell
 curl localhost:5000
