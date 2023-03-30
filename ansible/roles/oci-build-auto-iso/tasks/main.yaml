@@ -12,7 +12,7 @@
 
 - name: List Finished Builds
   ansible.builtin.command: >
-    composer-cli -j compose list finished
+    composer-cli compose list finished | grep {{ build_commit_id }} | wc -l
   changed_when: false
   register: compose_list
 
@@ -20,7 +20,7 @@
   ansible.builtin.assert:
     fail_msg: "Did not find a valid finished build for the commit id {{ build_commit_id }}!"
     that:
-      - compose_list.stdout | from_json | selectattr('id', 'equalto', build_commit_id) | list | length == 1
+      - compose_list.stdout == "1"
 
 - name: Set Remote Tar Directory
   ansible.builtin.set_fact:

@@ -1,37 +1,19 @@
-# RHEL for Edge Automation
+# RHEL for Edge Image Build as a Service
 
 ## はじめに
 
-RHEL for Edge (RFE) は、RHEL の構築とデプロイのための新しいモデルを導入します。このリポジトリには、RFE コンテンツを大規模に構築して提供する GitOps アプローチをサポートするために必要なドキュメントと自動化が含まれています。
-
-## 注目の分野
-
-このリポジトリのデザインは、以下のトピックに焦点を当てます。
-
-* Image Builder（複数）の展開
-* ブループリントの定義管理
-* RFEイメージの構築
-* RFEアーティファクトの管理/ホスティング
-  * キックスタート
-  * RFE OSTreeコンテンツ
-* CI/CD ツール/プロセス
-* RFE導入のエンドツーエンドインストール/アップデート
-* 規模に応じたRFE導入の管理
-  * ロギング/メトリックス収集の集計について
-  * コンテナ化されたワークロードのデプロイメント
+本リポジトリは、エッジコンピューティングへインストールするRHEL for EdgeのOSイメージのビルドとキックスタートの組み込みを自動化するデモです。本デモの出力として、HTTPDサーバにキックスタートファイルの組み込まれたOSイメージ(.iso)が格納されます。そのHTTPDサーバのURLをインストールソースとしてネットワークブートすることで、エッジデバイスへのOSのデプロイメントと構築作業を自動化します。
 
 ## アーキテクチャ
 ![全体アーキテクチャ](/images/overall-architecture.png)
 
-## 上記サイト構成要素
-
-OpenShiftは、上記のサイトコンポーネントをすべてホストするために使用されます。これらのコンポーネントは以下の通りです。
+## コンポーネント
 
 * Helm/Argo CD
   * GitOpsベースのデプロイメントと設定
 * OpenShift Virtualization
   * RHEL Image Builder
-  * 並列パイプライン（composes）をサポートするために、複数のImage Builder VMを配置することができます。
+  * パラレルなパイプライン（composes）をサポートするために、複数のImage Builder VMを配置することができます。
 * OpenShift Pipelines
   * Ansible playbookの実行
 * Nexus
@@ -39,31 +21,27 @@ OpenShiftは、上記のサイトコンポーネントをすべてホストす�
 * 一般的なオブジェクトストレージとしてOpenShift Data Foundation（NooBaaのみ）を使用します。
 * RFE OSTreeのコンテンツをRed Hat Quayで配信開始
 
-## 上記サイトコンポーネントの配置
+## 動作確認済みの環境
 
-[Helm](https://helm.sh)と[Argo CD](https://argoproj.github.io/argo-cd/)は、プロジェクトのコンポーネントをデプロイし管理するために使用します。HelmはArgo CDのapp of appsパターンを動的に生成するために使用され、その結果、ターゲット環境に必要な特定のコンポーネントをデプロイするために必要なすべてのHelmチャートを取り込みます。
+* AWS
+* OpenShift 4.12(IPIインストール)
 
-始める前に、`oc`/`kubectl`、`git`、`tkn`、`helm`の最新バージョンのクライアントがインストールされていることを確認します。また、SSH キーペアを生成する必要があります (以下に示す `ssh-keygen` を使用した例)。
-
-### ブートストラップ環境
-
-まず、以下のコマンドを実行して、リポジトリをクローンします。
+## 環境構築
+### 本リポジトリをローカルへclone
 
 ```shell
 git clone https://github.com/yd-ono/rhel-edge-automation-arch.git
 ```
 
-#### 値ファイルとSSHキーペアの準備
+### SSHキーペアとRed Hatポータルの認証情報の設定
 
-デプロイ時にいくつかのシークレットが作成されます。ブートストラッププロセスの一部として、それらに値を提供する必要があります。特定のコンポーネントの表は、以下にレイアウトされています。
-
-| コンポーネント｜説明
+| コンポーネント｜説明 | 
 |:-----------------------------|:------------------------------------------------------------------------|
-| SSHキー｜イメージビルダーVMへのキーベースの認証をサポートするために使用します。
-| Red Hat Portalのユーザー名｜Image Builder VMを購読するためのユーザー名｜Image Builder VMを購読するためのユーザー数
-| Red Hat Portalのパスワード｜Image BuilderのVMを登録するためのパスワード｜です。
-| プール ID｜Red Hat Subscription Manager のプール ID を使用して、適切なサブスクリプションを Image Builder VM にマップします。
-| Red Hat Portal Offline Token｜Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークンです｜。
+| SSHキー｜Image Builder VMへのキーベースの認証をサポートするために使用します。 |
+| Red Hat Portalのユーザー名｜Image Builder VMを購読するためのユーザー名｜Image Builder VMを購読するためのユーザー数 |
+| Red Hat Portalのパスワード｜Image BuilderのVMを登録するためのパスワードです。|
+| プール ID｜Red Hat Subscription Manager のプール ID を使用して、適切なサブスクリプションを Image Builder VM にマップします。|
+| Red Hat Portal Offline Token｜Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークンです。｜
 
 SSHキーペアを生成するには、以下のコマンドを実行します。
 
@@ -123,12 +101,16 @@ Argo CD のダッシュボードでデプロイの進捗を確認することが
 oc get route argocd-server -n rfe-gitops -ojsonpath='https://{.spec.host}'
 ```
 
-親アプリケーションは rfe-automation です。全てがデプロイされていることを確認するために、rfe-automationはSycned/Healthyを表示する必要があります。
+ArgoCDの状態を確認し、SYNC STATUSが`Synced`、HEALTH STATUSが`Healthy`であれば正常にデプロイできています。
 
 ```shell
 $ oc get application rfe-automation -n rfe-gitops
 NAME             SYNC STATUS   HEALTH STATUS
 rfe-automation   Synced        Healthy
+```
+
+```
+注. タイミングの問題でQuayが正常にデプロイできない可能性があります。その際は、一度OpenShift Data FoundationのOperatorを削除し、ArgoCDで再度Syncしてみてください。
 ```
 
 ### Tekton Configを変更
