@@ -235,7 +235,7 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 [
   {
     "name": "content-path",
-    "value": "http://httpd-rfe.apps.cluster.com/hello-world/latest"
+    "value": "http://httpd-rfe.apps.demo.sandbox132.opentlc.com/hello-world/latest"
   }
 ]
 ```
@@ -247,7 +247,7 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 `/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のような感じです。
 
 ```shell
-$ curl http://httpd-rfe.apps.cluster.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
+$ curl http://httpd-rfe.apps.demo.sandbox132.opentlc.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
 ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 ```
 
@@ -265,15 +265,15 @@ tkn pipeline start rfe-kickstart-pipeline \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
 --use-param-defaults \
 -p kickstart-path=ibm-weather-forecaster/kickstart.ks \
--p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest
+-p ostree-repo-url=$(oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-8sf7z -ojsonpath='{.status.pipelineResults[*].value}')
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
 前のコマンドを分解すると
 
-* `-p kickstart-path=ibm-weather-forecaster/kickstart.ks` - 参照されるリポジトリで使用するキックスタートの場所です。デフォルトでは、このリポジトリの _kickstarts_ ブランチが使用されます。
-* `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/hello-world/latest` - OSTree リポジトリの場所です。
+* `-p kickstart-path` - 参照されるリポジトリで使用するキックスタートの場所です。デフォルトでは、このリポジトリの _kickstarts_ ブランチが使用されます。
+* `-p ostree-repo-url` - OSTree リポジトリの場所です。
 
 tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別のコマンドを提供します。
 
@@ -281,7 +281,7 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 
 各パイプラインの実行は、2つの結果を返します。
 
-* Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
+* `Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
 * `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
 結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
@@ -289,21 +289,21 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
 NAME                               STARTED          DURATION   STATUS
-rfe-kickstart-pipeline-run-kqp5n   18 minutes ago   1 minute   Succeeded
+rfe-kickstart-pipeline-run-4g869   18 minutes ago   1 minute   Succeeded
 ```
 
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipelineResults}'
+$ oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "artifact-repository-storage-url",
-    "value": "https://nexus-rfe.apps.cluster.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"
+    "value": "https://nexus-rfe.apps.demo.sandbox132.opentlc.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"
   },
   {
     "name": "serving-storage-url",
-    "value": "https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks"
+    "value": "http://httpd-rfe.apps.demo.sandbox132.opentlc.com/hello-world/kickstarts/ibm-weather-forecaster/kickstart.ks"
   }
 ]
 ```
@@ -323,14 +323,14 @@ tkn pipeline start rfe-oci-iso-pipeline \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
 -s rfe-automation \
 --use-param-defaults \
--p kickstart-url=https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks \
--p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo
+-p kickstart-url=$(oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath="{.status.pipelineResults[1].value}") \
+-p ostree-repo-url=http://$(oc get route hello-world-latest -ojsonpath='{.status.ingress[*].host}')/repo
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
-* `-p キックスタート-url=https://httpd-rfe.apps.cluster.com/kickstarts/ibm-weather-forecaster/kickstart.ks` - ISO に埋め込まれるキックスタートへのパス。
-* `-p ostree-repo-url=http://hello-world-latest-rfe.apps.cluster.com/repo` - ISO に埋め込まれる OSTree リポジトリへのパスです。
+* `-p kickstart-url` - ISO に埋め込まれるキックスタートへのパス。
+* `-p ostree-repo-url` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
 ### Important Information Regarding Kickstarts
 
