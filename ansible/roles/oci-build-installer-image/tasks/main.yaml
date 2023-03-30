@@ -58,21 +58,19 @@
 
     - name: Set Build Commit ID
       ansible.builtin.set_fact:
-        build_commit_id: "{{ (composed_image.stdout | from_json).build_id }}"
+        build_commit_id: "{{ (composed_image.stdout | from_json).body.build_id }}"
 
     - name: Wait for Image Build to Complete
-      ansible.builtin.command: >
-        composer-cli -j compose status
+      ansible.builtin.shell: >
+        composer-cli compose status | grep {{ build_commit_id }} | awk '{print $2}'
       changed_when: false
       delay: 30
       failed_when: >
-        not (image_build_status.stdout | from_json | selectattr('id', 'equalto', build_commit_id) | list | first).finished and
-        (image_build_status.stdout | from_json | selectattr('id', 'equalto', build_commit_id) | list | first).status != "FINISHED"
+        image_build_status.stdout != "FINISHED"
       register: image_build_status
       retries: 200
       until: >
-        (image_build_status.stdout | from_json | selectattr('id', 'equalto', build_commit_id) | list | first).finished and
-        (image_build_status.stdout | from_json | selectattr('id', 'equalto', build_commit_id) | list | first).status == "FINISHED"
+        image_build_status.stdout == "FINISHED"
 
 - name: Save Build Commit ID to File
   ansible.builtin.copy:
