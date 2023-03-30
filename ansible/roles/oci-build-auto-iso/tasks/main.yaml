@@ -11,7 +11,7 @@
       - kickstart_url is defined
 
 - name: List Finished Builds
-  ansible.builtin.command: >
+  ansible.builtin.shell: >
     composer-cli compose list finished | grep {{ build_commit_id }} | wc -l
   changed_when: false
   register: compose_list

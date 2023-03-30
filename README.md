@@ -37,13 +37,13 @@ git clone https://github.com/yd-ono/rhel-edge-automation-arch.git
 
 ### SSHキーペアとRed Hatポータルの認証情報の設定
 
-| コンポーネント｜説明 |
-|:--- |:--- |
-| SSHキー｜Image Builder VMへのキーベースの認証をサポートするために使用します。 |
-| Red Hat Portalのユーザー名｜Image Builder VMをサブスクライブするためのユーザー名 ｜
-| Red Hat Portalのパスワード｜Image BuilderのVMを登録するためのパスワード |
-| プール ID｜Red Hat Subscription Manager のプール ID を使用して、適切なサブスクリプションを Image Builder VM にマップします。 |
-| Red Hat Portal Offline Token｜Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークン |
+| コンポーネント | 説明 | Right-aligned |
+| :---         | :---         |
+| SSHキー   | Image Builder VMへSSHするために使用   |
+| Red Hat Portalのユーザー名     | Image Builder VMをサブスクリプションへ登録するためのユーザー名     |
+| Red Hat Portalのパスワード   | Image Builder VMをサブスクリプションへ登録するためのパスワード  |
+| Pool ID     | Red Hat Subscription Manager のPool ID を使用し、適切なサブスクリプションを Image Builder VM にマップ    |
+| Red Hat Portal Offline Token     | Red Hat APIへのアクセスやRHELイメージのダウンロードに使用されるトークン     |
 
 SSHキーペアを生成するには、以下のコマンドを実行します。
 
