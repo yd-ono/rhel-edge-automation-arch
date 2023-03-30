@@ -119,6 +119,7 @@
     argv:
       - "skopeo"
       - "copy"
+      - "--retry-times=5"
       - "--command-timeout=10m"
       - "--src-authfile=/var/secrets/publisher/.dockerconfigjson"
       - "--src-tls-verify=false"
