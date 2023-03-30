@@ -28,6 +28,7 @@ spec:
       description: Path to Container Image
   results:
     - name: image-tags
+      type: array
       description: Tags Associated with Image
   steps:
     - name: push-image-playbook
