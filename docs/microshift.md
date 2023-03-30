@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-例題を始める前に、以下の要件を満たしている必要があります：
+例題を始める前に、以下の要件を満たしている必要があります。
 
 1. OpenShift CLI ツール
 2. Tekton CLIツール
@@ -18,7 +18,7 @@
 
 ### Updating Default Password
 
-より安全なインストールを行うには、ブループリントを修正し、パスワードハッシュを更新することをお勧めします。次のコマンドを使用して、新しいハッシュを生成します：
+より安全なインストールを行うには、ブループリントを修正し、パスワードハッシュを更新することをお勧めします。次のコマンドを使用して、新しいハッシュを生成します。
 
 ```shell
 openssl passwd -6
@@ -28,7 +28,7 @@ customizations.user`の`password`パラメータのハッシュを、上記で�
 
 ### Additional Content Sources
 
-以下の内容で `/tmp/microshift-additional-sources.json` というファイルを作成します：
+以下の内容で `/tmp/microshift-additional-sources.json` というファイルを作成します。
 
 ```json
 {
@@ -61,13 +61,13 @@ customizations.user`の`password`パラメータのハッシュを、上記で�
 
 ## Building a MicroShift Image
 
-OpenShift CLIにログインし、`rfe`ネームスペースに変更します：
+OpenShift CLIにログインし、`rfe`ネームスペースに変更します。
 
 ```shell
 oc project rfe
 ```
 
-プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、`microshift` ブループリントをビルドします：
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-image-pipeline` パイプラインを実行し、`microshift` ブループリントをビルドします。
 
 ```shell
 tkn pipeline start rfe-oci-image-pipeline \
@@ -88,7 +88,7 @@ _Note: イメージの構築作業には時間がかかります。
 
 ### Pipeline Results
 
-各パイプラインの実行は、4つの結果を返します：
+各パイプラインの実行は、4つの結果を返します。
 
 * `build-commit` - Image Builder からのビルドコミット ID。
 * `image-builder-host` - パイプラインの実行時に使用される Image Builder のホストです．
@@ -96,7 +96,7 @@ _Note: イメージの構築作業には時間がかかります。
 * `image-tags` - コンテナに適用されるタグ（JSONリスト）。
 
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
@@ -104,7 +104,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-image-pipeline-run-g8hzp   1 day ago   16 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-g8hzp -ojsonpath='{.status.pipelineResults}'
@@ -143,18 +143,18 @@ tkn pipeline start rfe-oci-stage-pipeline \
 -p image-tag=latest
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます。
 
 * `-p image-path=quay-quay.apps.cluster.com/rfe/microshift` - Quayレジストリに保存されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-各パイプラインの実行は、1つの結果を返します：
+各パイプラインの実行は、1つの結果を返します。
 
 * `content-path` - OSTreeリポジトリへのパス。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1
@@ -162,7 +162,7 @@ NAME                               STARTED     DURATION     STATUS
 rfe-oci-stage-pipeline-run-cxkxq   1 day ago   13 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.status.pipelineResults}'
@@ -178,7 +178,7 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 
 次の段階では、ステージング環境から本番環境へOSTree Commitを同期させることになります。
 
-プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します：
+プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します。
 
 ```shell
 tkn pipeline start rfe-oci-publish-content-pipeline \
@@ -189,18 +189,18 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 -p image-tag=latest 
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます。
 
 * `-p image-path=quay-quay.apps.cluster.com/rfe/microshift` - Quayレジストリに保存されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
 ### Pipeline Results
 
-各パイプラインの実行は、1つの結果を返します：
+各パイプラインの実行は、1つの結果を返します。
 
 * `content-path` - OSTreeリポジトリへのパス。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1
@@ -208,7 +208,7 @@ NAME                                         STARTED     DURATION   STATUS
 rfe-oci-publish-content-pipeline-run-ptrpx   1 day ago   1 minute   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpath='{.status.pipelineResults}'
@@ -224,7 +224,7 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 
 rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担っています。パイプラインはAnsibleを使用しているため、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
 
-rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します：
+rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します。
 
 ```shell
 tkn pipeline start rfe-kickstart-pipeline \
@@ -235,7 +235,7 @@ tkn pipeline start rfe-kickstart-pipeline \
 -p ostree-repo-url=file:///run/install/repo/ostree/repo
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
 前のコマンドを分解すると
 
@@ -246,12 +246,12 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 
 ### Pipeline Results
 
-各パイプラインの実行は、2つの結果を返します：
+各パイプラインの実行は、2つの結果を返します。
 
 * Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
 * `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
@@ -259,7 +259,7 @@ NAME                               STARTED          DURATION   STATUS
 rfe-kickstart-pipeline-run-kqp5n   18 minutes ago   1 minute   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipelineResults}'
@@ -279,7 +279,7 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-kqp5n -ojsonpath='{.status.pipel
 
 Image Builder 8.4 の新機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
 
-プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します：
+プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します。
 
 ```shell
 tkn pipeline start rfe-oci-iso-pipeline \
@@ -290,20 +290,20 @@ tkn pipeline start rfe-oci-iso-pipeline \
 -p ostree-repo-url=http://httpd-rfe.apps.cluster.com/microshift/latest
 ```
 
-このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます：
+このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
 
 * `-p キックスタート-url=https://httpd-rfe.apps.cluster.com/kickstarts/microshift/kickstart.ks` - ISO に埋め込まれるキックスタートへのパス。
 * `-p ostree-repo-url=http://httpd-rfe.apps.cluster.com/microshift/latest` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
 ### Pipeline Results
 
-各パイプラインの実行は、2つの結果を返します：
+各パイプラインの実行は、2つの結果を返します。
 
 * `build-commit-id` - Image Builder からのビルドコミット ID。
 * パイプラインの実行時に使用される Image Builder のホストです．
 * `iso-url` - オートブートするISOの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します：
+結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
 
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1
@@ -311,7 +311,7 @@ NAME                             STARTED      DURATION     STATUS
 rfe-oci-iso-pipeline-run-2lpwc   3 days ago   13 minutes   Succeeded
 ```
 
-次に以下を実行すると、パイプラインの結果が表示されます：
+次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
 $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
