@@ -1,35 +1,30 @@
 # Basic Walkthrough
 
-このガイドでは、このアーキテクチャを使用して最初の RHEL for Edge イメージを構築するプロセスについて説明します。このガイドでは、以下のことを学びます。
+このドキュメントは、最初の RHEL for Edge イメージを構築するプロセスについて説明します。
 
-* このアーキテクチャの主要なコンポーネントを理解する
-* Blueprint から RHEL for Edge イメージを構築する。
-* 事前にビルドした RHEL for Edge イメージを参照するキックスタート・ファイルを公開する。
+## 事前準備
 
-## Prerequisites
-
-ウォークスルーを開始する前に、以下の要件を満たしている必要があります。
+開始する前に、以下の要件を満たしている必要があります。
 
 1. OpenShift CLI ツール
 2. Tekton CLIツール
 3. curl CLIツール
 4. 本リポジトリに関連するツールでプロビジョニングされたOpenShiftクラスタ
-5. cluster-admin`権限を持つユーザーとして、OpenShiftクラスタにアクセスする。
+5. `cluster-admin`権限を持つユーザーとして、OpenShiftクラスタにアクセスする。
 
-## Use Case Overview
+## ユースケース概要
 
-このウォークスルーでは、RHEL for Edge コンテンツの構築、公開、消費の容易さを説明します。サンプルのユースケースでは、コンテナで動作する [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) アプリケーションを持つエッジノードを構築し、デプロイする予定です。このプロセスは以下のように構成されています。
+このウォークスルーでは、RHEL for Edge コンテンツの構築、公開、消費の容易さを説明します。サンプルのユースケースでは、コンテナで動作する [IBM Developer Model Asset Exchange: Weather Forecaster](https://github.com/IBM/MAX-Weather-Forecaster) アプリケーションを持つエッジノードを構築し、デプロイします。このプロセスは以下のように構成されています。
 
 * 以下のような一連のパイプラインを実行します。
-  + イメージビルダーを使用して、compose image type `rhel-edge-container` を使用してカスタム RHEL for Edge イメージ (OSTree commit) を作成する。
+  + Image Builderを使用して、compose image type `rhel-edge-container` を使用し、カスタム RHEL for Edge イメージ (OSTree commit) を作成する。
   + 生成されたOCIコンテナを岸壁に押し付ける
   + OpenShiftにOCIコンテナをデプロイしてステージングする。
-  + OpenShift上で動作するWebサーバーからOStreeのコンテンツを同期して本番のプロモーションを行う。
+  + OpenShift上で動作するWebサーバーからOStreeのコンテンツを同期して本番環境へ配信する。
 * コンテナワークロードを実行するための設定を含むキックスタートファイルを作成する。
 * OSTree コミットとキックスタートを組み込んだ自動起動の RHEL for Edge インストーラ ISO を作成する。
 
-
-## Building a RHEL for Edge Image
+## RHEL for Edgeイメージのビルド
 
 RHEL for Edgeイメージの構築プロセスでは、パッケージのリスト、パッケージのエントリモジュール、および結果のイメージに対するカスタマイズを含むブループリントを構成します。このアーキテクチャには、既存のブループリントからRHEL for Edgeイメージを構築することを目的としたTektonパイプラインが含まれています。ブループリントのサンプルは、このリポジトリの [blueprints](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints) ブランチにあります。
 
@@ -74,7 +69,7 @@ tkn pipeline start rfe-oci-image-pipeline \
 
 _Note: RHEL for Edgeイメージの構築プロセスには時間がかかります！_
 
-### Pipeline Results
+### パイプラインの結果
 
 各パイプラインの実行は、3つの結果を返します。
 
@@ -110,7 +105,7 @@ $ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.statu
 ]
 ```
 
-### Verification
+### 確認
 
 パイプラインが完了すると、Image Builder で生成された OCI コンテナが Quay に格納されているはずです。確認のため、以下のコマンドを実行してQuayへの経路を取得します。
 
@@ -139,9 +134,9 @@ Quayにログインしたら、ページの右側にある_Users and Organizatio
 この時点で、RFE コンテンツのデプロイで使用するコンテナを手動でプル/デプロイすることができます。
 
 
-## Staging OCI Container with OSTree Commit
+## OSTreeコミットしたOCIコンテナをステージングへ移行
 
-さて、QuayでOSTree CommitしたImage BuilderのOCIコンテナができたので、パイプラインを実行してOpenShiftのステージング環境としてデプロイしてみましょう。
+QuayでOSTreeコミットしたOCIコンテナができたので、パイプラインを実行してOpenShiftのステージング環境としてデプロイしてみましょう。
 
 プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-stage-pipeline` パイプラインを実行し、前回のパイプライン (`rfe-oci-image-pipeline`) 実行で構築したOCIコンテナをデプロイします。
 
@@ -159,7 +154,7 @@ tkn pipeline start rfe-oci-stage-pipeline \
 * `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
-### Pipeline Results
+### パイプラインの結果
 
 各パイプラインの実行は、1つの結果を返します。
 
@@ -185,7 +180,7 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 ]
 ```
 
-### Verification
+### 確認
 
 パイプラインが実行されると、ImageStream、Deployment、Service、Routeが`rfe`名前空間に設定されます。デプロイメントを確認するために、OSTree Commit のハッシュをクエリしてみます。先ほどの `rfe-oci-stage-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、`/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のようになります。
 
@@ -194,9 +189,9 @@ $ curl http://hello-world-latest-rfe.apps.cluster.com/repo/refs/heads/rhel/8/x86
 ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 ```
 
-## Moving from Stage to Production
+## ステージングから本番環境へ移行
 
-次の段階では、ステージング環境から本番環境へOSTree Commitを同期させることになります。
+次に、ステージング環境から本番環境へOSTree Commitを同期させることになります。
 
 プロジェクトのルートから、以下のコマンドを実行し、`rfe-oci-publish-content-pipeline`パイプラインを実行します。
 
@@ -214,7 +209,7 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 * `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
 * `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
 
-### Pipeline Results
+### パイプライン結果
 
 各パイプラインの実行は、1つの結果を返します。
 
@@ -240,7 +235,7 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 ]
 ```
 
-### Verification
+### 確認
 
 パイプラインが実行されると、OSTree Commitは本番のWebサーバーに同期されます。以下のコマンドを実行して、ハッシュを確認します。
 
@@ -253,11 +248,11 @@ ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
 
 このリポジトリのハッシュは、`rfe-oci-stage-pipeline`パイプラインの実行中に生成されたリポジトリのハッシュと一致するようになりました。
 
-## Creating the Kickstart File
+## キックスタートファイルを生成
 
-rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担っています。パイプラインはAnsibleを使用しているため、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
+`rfe-kickstart-pipeline`というTektonパイプラインは、NexusとHTTPDサーバーの両方にKickstartファイルを発行する役割を担います。パイプラインはAnsibleを使用し、Jinjaベースのテンプレートがキーバリュー（特にOSTreeリポジトリの場所）を注入するために利用できます。
 
-rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します。
+`rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します。
 
 ```shell
 tkn pipeline start rfe-kickstart-pipeline \
@@ -277,7 +272,7 @@ tkn pipeline start rfe-kickstart-pipeline \
 
 tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別のコマンドを提供します。
 
-### Pipeline Results
+### パイプライン結果
 
 各パイプラインの実行は、2つの結果を返します。
 
@@ -308,13 +303,13 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath='{.status.pipel
 ]
 ```
 
-### Verification
+### 確認
 
 検証するには、`artifact-repository-storage-url` と `serving-storage-url` パイプラインの結果で定義された URL を使用してキックスタートファイルを引き出すだけです。
 
-## Creating Auto Booting RFE Installer
+## 自動ブート用RHEL for Edgeイメージ(ISO)を生成
 
-Image Builder 8.4 の新機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
+Image Builderの機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
 
 プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します。
 
@@ -332,7 +327,7 @@ tkn pipeline start rfe-oci-iso-pipeline \
 * `-p kickstart-url` - ISO に埋め込まれるキックスタートへのパス。
 * `-p ostree-repo-url` - ISO に埋め込まれる OSTree リポジトリへのパスです。
 
-### Important Information Regarding Kickstarts
+### 独自のキックスタートファイルを使用する場合
 
 独自のキックスタートファイルを用意する場合は、`ostreesetup`コマンドの以下の行を使用します（`--url`はインストーラに組み込まれているOSTreeリポジトリを指していますが、任意のOSTreeリポジトリを指すことができることに注意してください）。
 
@@ -348,7 +343,7 @@ ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref
 
 キックスタートによるユーザー作成などの一般的なタスクは機能しません。これらのアクションは、OSTree のコミットを構築するために使用するブループリント ファイルに含める必要があります。しかし、`%post` のような他のタスクはまだ動作するはずです。
 
-### Pipeline Results
+### パイプラインの結果
 
 各パイプラインの実行は、2つの結果を返します。
 
@@ -379,19 +374,19 @@ $ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.
 ]
 ```
 
-### Verification
+### 確認
 
 検証するには、`iso-url`パイプラインの結果で定義されたURLを使ってISOを引き出すだけです。
 
-## Creating a RHEL for Edge Node
+## RHEL for Edgeノードの生成
 
-### Using Auto Booting ISO
+### 自動ブート用ISOを使用する
 
-自動起動するISOは、RHEL for Edgeを自動的にインストールするように構成されており、ユーザーの入力は必要ありません。ISOを起動するだけで、インストールできます。
+自動ブート用ISOは、RHEL for Edgeを自動的にインストールするように構成されており、ユーザーの入力は必要ありません。ISOを起動するだけで、インストールできます。
 
-### Manually Using Kickstart File
+### キックスタートファイルを手動で指定する場合
 
-キックスタートと OSTree リポジトリがセットアップされたので、RHEL 8 ブートイメージを使用して新しいマシンをブートして、Edge Node 用の新しい RHEL を作成します。
+キックスタートファイルと OSTree リポジトリがセットアップされているため、RHELブートイメージを使用して新しいマシンをブートし、エッジ用の新しい RHEL を作成します。
 
 ブートメニューで、タブキーを押し、ブート引数のリストに以下を追加します。
 
@@ -401,7 +396,7 @@ inst.ks=<URL_OF_KICKSTART_FILE>
 
 Enter を押して、キックスタートを使用してマシンを起動します。マシンはOSTreeのコンテンツを取得し、サンプルアプリケーションを実行するための準備をします。完了すると、マシンは再起動します
 
-### Verify the Application
+### アプリケーションの確認
 
 マシンが再起動したら、ノードのインストールの一部として作成されたユーザーでログインします。
 
@@ -421,5 +416,5 @@ curl localhost:5000
 
 アプリケーションとの対話に関するその他の詳細は、[プロジェクトリポジトリ](https://github.com/IBM/MAX-Weather-Forecaster)に記載されています。
 
-これで、ウォークスルーは成功です！
+以上です。
 
