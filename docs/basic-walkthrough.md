@@ -319,7 +319,7 @@ tkn pipeline start rfe-oci-iso-pipeline \
 -s rfe-automation \
 --use-param-defaults \
 -p kickstart-url=$(oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath="{.status.pipelineResults[1].value}") \
--p ostree-repo-url=http://$(oc get route hello-world-latest -ojsonpath='{.status.ingress[*].host}')/repo
+-p ostree-repo-url=$(oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-8sf7z -ojsonpath='{.status.pipelineResults[*].value}')/refs/heads/rhel/8/x86_64/edge
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
