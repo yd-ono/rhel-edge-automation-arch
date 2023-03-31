@@ -76,7 +76,8 @@ rhsm:
 Workerノードとして、AWSのベアメタルインスタンスを追加します。
 
 ```shell
-oc apply -f machine-bm.yaml
+export CLUSTER_ID=xxxxx
+cat machine-bm.yaml | envsubst | oc apply -f -
 ```
 
 #### OpenShift GitOps Operatorのデプロイ
