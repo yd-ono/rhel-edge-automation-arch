@@ -26,9 +26,9 @@
 
 ## RHEL for Edgeイメージのビルド
 
-RHEL for Edgeイメージの構築プロセスでは、パッケージのリスト、パッケージのエントリモジュール、および結果のイメージに対するカスタマイズを含むブループリントを構成します。このアーキテクチャには、既存のブループリントからRHEL for Edgeイメージを構築することを目的としたTektonパイプラインが含まれています。ブループリントのサンプルは、このリポジトリの [blueprints](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints) ブランチにあります。
+RHEL for Edgeイメージの構築プロセスでは、パッケージのリスト、パッケージのエントリモジュール、および結果のイメージに対するカスタマイズを含むブループリントを構成します。このアーキテクチャには、既存のブループリントからRHEL for Edgeイメージを構築することを目的としたTektonパイプラインが含まれています。ブループリントのサンプルは、このリポジトリの [blueprints](https://github.com/yd-ono/rhel-edge-automation-arch/tree/blueprints) ブランチにあります。
 
-最も基本的な構成については、サンプル [hello-world](https://github.com/redhat-cop/rhel-edge-automation-arch/tree/blueprints/hello-world) ブループリントが用意されており、コンテナ化されたアプリケーションを実行するために必要な構成が提供されます。
+最も基本的な構成については、サンプル [hello-world](https://github.com/yd-ono/rhel-edge-automation-arch/tree/blueprints/hello-world) ブループリントが用意されており、コンテナ化されたアプリケーションを実行するために必要な構成が提供されます。
 
 RHEL for Edgeアプリケーションを管理するためのコンテンツは、すべてOpenShiftクラスタ内の`rfe` namespaceにあります。
 
@@ -59,7 +59,7 @@ tkn pipeline start rfe-oci-image-pipeline \
 * `tkn` - Tekton CLI
 * `pipeline` - 管理するリソース。
 * `start` - 実行するアクション。パイプラインの実行を開始します。
-* `--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml` - ファイル [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/redhat-cop/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml) にあるテンプレートを使用して Tekton ワークスペースをバックアップするために PersistentVolumeClaim を使用することを指定する。
+* `--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml` - ファイル [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/yd-ono/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml) にあるテンプレートを使用して Tekton ワークスペースをバックアップするために PersistentVolumeClaim を使用することを指定する。
 * `-s rfe-automation` - パイプラインを実行するために使用するサービスアカウント名です。
 * `--use-param-default` - 明示的に指定しない限り、パイプラインのデフォルトパラメータが適用されます。
 * `-p blueprint-dir=hello-world` - クローンリポジトリのブループリント・ファイルを含むディレクトリです。デフォルトでは、このリポジトリの _blueprints_ ブランチが使用されます。
