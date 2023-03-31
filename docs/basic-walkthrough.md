@@ -82,13 +82,13 @@ _Note: RHEL for Edgeイメージの構築プロセスには時間がかかりま
 ```shell
 $ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
 NAME                               STARTED     DURATION     STATUS
-rfe-oci-image-pipeline-run-2lpwc   1 day ago   13 minutes   Succeeded
+rfe-oci-image-pipeline-run-lfgjs   1 day ago   13 minutes   Succeeded
 ```
 
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
+$ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-lfgjs -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "build-commit",

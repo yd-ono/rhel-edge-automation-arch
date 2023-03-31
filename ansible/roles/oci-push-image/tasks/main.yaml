@@ -103,6 +103,7 @@
     argv:
       - "skopeo"
       - "copy"
+      - "--retry-times={{ command_retries }}"
       - "--command-timeout=10m"
       - "--dest-authfile=/var/secrets/publisher/.dockerconfigjson"
       - "--dest-tls-verify=false"

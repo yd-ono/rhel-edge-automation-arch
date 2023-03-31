@@ -108,7 +108,7 @@ oc get route argocd-server -n rfe-gitops -ojsonpath='https://{.spec.host}'
 ArgoCDの状態を確認し、SYNC STATUSが`Synced`、HEALTH STATUSが`Healthy`であれば正常にデプロイできています。
 
 ```shell
-$ oc get application rfe-automation -n rfe-gitops
+oc get application rfe-automation -n rfe-gitops
 NAME             SYNC STATUS   HEALTH STATUS
 rfe-automation   Synced        Healthy
 ```
