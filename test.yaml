@@ -1,0 +1,160 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    app.kubernetes.io/instance: rfe-pipelines
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pipelines
+    helm.sh/chart: pipelines-0.1.0
+  name: rfe-oci-image-pipeline
+  namespace: rfe
+spec:
+  params:
+    - description: Directory in Blueprints repository containing blueprint
+      name: blueprint-dir
+      type: string
+    - default: blueprints
+      description: Blueprint Repository URL Reference
+      name: blueprints-git-revision
+      type: string
+    - default: 'https://github.com/yd-ono/rhel-edge-automation-arch.git'
+      description: Blueprint Repository URL
+      name: blueprints-git-url
+      type: string
+    - default: IntcbiAgXCJzb3VyY2VzXCI6IHtcbiAgfVxufVxuIg==
+      description: JSON object with list of Additional Image Builder sources
+      name: additional-content-sources
+      type: string
+    - default: >-
+        IntcbiAgXCJyZXBvc2l0b3JpZXNcIjogW1xuICAgIFwicmhlbC04LWZvci14ODZfNjQtYmFzZW9zLXJwbXNcIixcbiAgICBcInJoZWwtOC1mb3IteDg2XzY0LWFwcHN0cmVhbS1ycG1zXCJcbiAgXVxufVxuIg==
+      description: JSON object with list of RHEL Repos
+      name: rhsm-repositories
+      type: string
+    - default: main
+      description: Tooling Repository URL Reference
+      name: tooling-git-revision
+      type: string
+    - default: 'https://github.com/yd-ono/rhel-edge-automation-arch.git'
+      description: Tooling Repository URL
+      name: tooling-git-url
+      type: string
+    - description: Path to RFE Container Image
+      name: image-path
+      type: string
+    - description: Tag Associated with the RFE Image to Deploy
+      name: image-tag
+      type: string
+    - default: ''
+      description: Host Field for OpenShift Route Resource
+      name: route-host
+      type: string
+  results:
+    - description: Commit ID of the Build
+      name: build-commit
+      value: $(tasks.rfe-oci-build-image.results.build-commit)
+    - description: Path to Container Registry
+      name: image-path
+      value: $(tasks.rfe-oci-quay-repository.results.image-path)
+    - description: Image Builder Host used for Pipeline Run
+      name: image-builder-host
+      value: $(tasks.rfe-oci-build-image.results.image-builder-host)
+    - description: Tags Associated with Image
+      name: image-tags
+      value: $(tasks.rfe-oci-push-image.results.image-tags)
+    - description: URL to OSTree Content
+      name: content-path
+      value: $(tasks.rfe-oci-stage-image.results.content-path)
+  tasks:
+    - name: git-clone-tooling
+      params:
+        - name: url
+          value: $(input.params.tooling-git-url)
+        - name: revision
+          value: $(input.params.tooling-git-revision)
+        - name: subdirectory
+          value: tooling
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: git-clone-blueprints
+      params:
+        - name: url
+          value: $(params.blueprints-git-url)
+        - name: revision
+          value: $(params.blueprints-git-revision)
+        - name: subdirectory
+          value: blueprints
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: rfe-oci-quay-repository
+      params:
+        - name: repository-name
+          value: $(params.blueprint-dir)
+      runAfter:
+        - git-clone-blueprints
+        - git-clone-tooling
+      taskRef:
+        kind: Task
+        name: rfe-oci-quay-repository
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+    - name: rfe-oci-build-image
+      params:
+        - name: blueprint-dir
+          value: /workspace/workspace/blueprints/$(params.blueprint-dir)
+        - name: additional-content-sources
+          value: $(params.additional-content-sources)
+        - name: rhsm-repositories
+          value: $(params.rhsm-repositories)
+      runAfter:
+        - rfe-oci-quay-repository
+      taskRef:
+        kind: Task
+        name: rfe-oci-build-image
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+    - name: rfe-oci-push-image
+      params:
+        - name: blueprint-dir
+          value: /workspace/workspace/blueprints/$(params.blueprint-dir)
+        - name: build-commit
+          value: $(tasks.rfe-oci-build-image.results.build-commit)
+        - name: image-builder-host
+          value: $(tasks.rfe-oci-build-image.results.image-builder-host)
+        - name: image-path
+          value: $(tasks.rfe-oci-quay-repository.results.image-path)
+      runAfter:
+        - rfe-oci-build-image
+      taskRef:
+        kind: Task
+        name: rfe-oci-push-image
+    - name: rfe-oci-stage-image
+      params:
+        - name: image-path
+          value: $(params.image-path)
+        - name: image-tag
+          value: $(params.image-tag)
+        - name: route-host
+          value: $(params.route-host)
+      runAfter:
+        - git-clone-tooling
+      taskRef:
+        kind: Task
+        name: rfe-oci-stage-image
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+  workspaces:
+    - name: shared-workspace

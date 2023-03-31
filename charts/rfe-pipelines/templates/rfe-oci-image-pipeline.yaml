@@ -58,9 +58,9 @@ spec:
         kind: ClusterTask
       params:
         - name: url
-          value: $(input.params.tooling-git-url)
+          value: $(params.tooling-git-url)
         - name: revision
-          value: $(input.params.tooling-git-revision)
+          value: $(params.tooling-git-revision)
         - name: subdirectory
           value: "tooling"
       workspaces:
