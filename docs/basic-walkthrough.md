@@ -59,7 +59,7 @@ tkn pipeline start rfe-oci-image-pipeline \
 * `tkn` - Tekton CLI
 * `pipeline` - 管理するリソース。
 * `start` - 実行するアクション。パイプラインの実行を開始します。
-* `--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml` - ファイル [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/yd-ono/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml) にあるテンプレートを使用して Tekton ワークスペースをバックアップするために PersistentVolumeClaim を使用することを指定する。
+* `--workspace name` - ファイル [examples/pipelines/volumeclaimtemplate.yaml](https://github.com/yd-ono/rhel-edge-automation-arch/blob/main/examples/pipelines/volumeclaimtemplate.yaml) にあるテンプレートを使用して Tekton ワークスペースをバックアップするために PersistentVolumeClaim を使用することを指定する。
 * `-s rfe-automation` - パイプラインを実行するために使用するサービスアカウント名です。
 * `--use-param-default` - 明示的に指定しない限り、パイプラインのデフォルトパラメータが適用されます。
 * `-p blueprint-dir=hello-world` - クローンリポジトリのブループリント・ファイルを含むディレクトリです。デフォルトでは、このリポジトリの _blueprints_ ブランチが使用されます。
