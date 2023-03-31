@@ -120,7 +120,7 @@ rfe-automation   Synced        Healthy
 `rfe-oci-push-image` Taskのpipeline.resultのタイプを`array`としているため、Tektonの`enable-api-fields`を`alpha`へ変更してください。
 
 ```shell
-oc edit tektonconfig
+oc edit tektonconfig -n openshift-pipelines
 ...
     enable-api-fields: alpha
 ...
