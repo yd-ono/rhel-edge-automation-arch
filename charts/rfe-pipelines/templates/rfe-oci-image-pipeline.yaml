@@ -32,7 +32,7 @@ spec:
       description: Tooling Repository URL Reference
       default: {{ $.Values.pipelines.repos.tooling.targetRevision }}
       type: string
-    - name: tooling-git-url 
+    - name: tooling-git-url
       description: Tooling Repository URL
       default: {{ $.Values.pipelines.repos.tooling.repoURL }}
       type: string
