@@ -18,7 +18,7 @@
 
 * 以下のような一連のパイプラインを実行します。
   + Image Builderを使用して、compose image type `rhel-edge-container` を使用し、カスタム RHEL for Edge イメージ (OSTree commit) を作成する。
-  + 生成されたOCIコンテナを岸壁に押し付ける
+  + 生成されたOCIコンテナをQuayへPushする
   + OpenShiftにOCIコンテナをデプロイしてステージングする。
   + OpenShift上で動作するWebサーバーからOStreeのコンテンツを同期して本番環境へ配信する。
 * コンテナワークロードを実行するための設定を含むキックスタートファイルを作成する。
@@ -77,18 +77,12 @@ _Note: RHEL for Edgeイメージの構築プロセスには時間がかかりま
 * `image-path` - OCI コンテナの Quay レジストリ内の位置
 * `image-tags` - コンテナに適用されるタグ（JSONリスト）。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
-
-```shell
-$ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1
-NAME                               STARTED     DURATION     STATUS
-rfe-oci-image-pipeline-run-lfgjs   1 day ago   13 minutes   Succeeded
-```
-
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun -n rfe rfe-oci-image-pipeline-run-lfgjs -ojsonpath='{.status.pipelineResults}'
+export IMAGE_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-image-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+oc get pipelinerun -n rfe $IMAGE_PIPELINE -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "build-commit",
@@ -156,26 +150,21 @@ tkn pipeline start rfe-oci-stage-pipeline \
 
 ### パイプラインの結果
 
+
 各パイプラインの実行は、1つの結果を返します。
 
 * `content-path` - OSTreeのリポジトリへのパスです。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
-
-```shell
-$ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1
-NAME                               STARTED     DURATION     STATUS
-rfe-oci-stage-pipeline-run-cxkxq   1 day ago   13 minutes   Succeeded
-```
-
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.status.pipelineResults}'
+export STAGE_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-stage-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+oc get pipelinerun -n rfe $STAGE_PIPELINE -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "content-path",
-    "value": "http://hello-world-latest-rfe.apps.cluster.com/repo"
+    "value": "http://hello-world-latest-rfe.apps.demo.sandbox2633.opentlc.com/repo"
   }
 ]
 ```
@@ -185,8 +174,8 @@ $ oc get pipelinerun -n rfe rfe-oci-stage-pipeline-run-cxkxq -ojsonpath='{.statu
 パイプラインが実行されると、ImageStream、Deployment、Service、Routeが`rfe`名前空間に設定されます。デプロイメントを確認するために、OSTree Commit のハッシュをクエリしてみます。先ほどの `rfe-oci-stage-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、`/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のようになります。
 
 ```
-$ curl http://hello-world-latest-rfe.apps.cluster.com/repo/refs/heads/rhel/8/x86_64/edge
-ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
+$ curl http://hello-world-latest-rfe.apps.demo.sandbox2633.opentlc.com/repo/refs/heads/rhel/8/x86_64/edge
+3e0a552e018828c3cdbe5f32b56fa6a4b7a2956e6eb8da3f5b24eb5d91114bf5
 ```
 
 ## ステージングから本番環境へ移行
@@ -206,8 +195,8 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 
 このコマンドは、前のパイプラインの実行と似ていますが、以下のパラメータが使用されます。
 
-* `-p image-path=quay-quay.apps.cluster.com/rfe/hello-world` - Quayレジストリに格納されているOCIコンテナのパスです。
-* `-p image-tag=latest` - _latest_ というタグのついたイメージを使用します。
+* `-p image-path` - Quayレジストリに格納されているOCIコンテナのパスです。
+* `-p image-tag` - _latest_ というタグのついたイメージを使用します。
 
 ### パイプライン結果
 
@@ -215,18 +204,12 @@ tkn pipeline start rfe-oci-publish-content-pipeline \
 
 * `content-path` - OSTreeリポジトリへのパス。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
-
-```shell
-$ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1
-NAME                                         STARTED     DURATION   STATUS
-rfe-oci-publish-content-pipeline-run-ptrpx   1 day ago   1 minute   Succeeded
-```
-
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpath='{.status.pipelineResults}'
+export PUBLISH_CONTENT_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "content-path",
@@ -242,8 +225,9 @@ $ oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-ptrpx -ojsonpat
 前の `rfe-oci-publish-content-pipeline` パイプラインの実行で得られた `content-path` の結果を使用して `curl` を実行し、 `/refs/heads/rhel/8/x86_64/edge` を追記します。例えば、以下のような感じです。
 
 ```shell
-$ curl http://httpd-rfe.apps.demo.sandbox132.opentlc.com/hello-world/latest/refs/heads/rhel/8/x86_64/edge
-ed9e194df0c2f70c49942c00696edbdcd86f7c06e1b930c2ed3cb0a0a99a87c5
+export OSTREE_REPO_URL=$(oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults[*].value}')
+curl $OSTREE_REPO_URL/refs/heads/rhel/8/x86_64/edge
+3e0a552e018828c3cdbe5f32b56fa6a4b7a2956e6eb8da3f5b24eb5d91114bf5
 ```
 
 このリポジトリのハッシュは、`rfe-oci-stage-pipeline`パイプラインの実行中に生成されたリポジトリのハッシュと一致するようになりました。
@@ -260,7 +244,7 @@ tkn pipeline start rfe-kickstart-pipeline \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
 --use-param-defaults \
 -p kickstart-path=ibm-weather-forecaster/kickstart.ks \
--p ostree-repo-url=$(oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-8sf7z -ojsonpath='{.status.pipelineResults[*].value}')
+-p ostree-repo-url=$OSTREE_REPO_URL
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
@@ -279,28 +263,13 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 * `Artifact-repository-storage-url` - Nexus サーバー上のキックスタートの位置。
 * `serving-storage-url` - HTTPD サーバー上のキックスタートの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
-
-```shell
-$ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1
-NAME                               STARTED          DURATION   STATUS
-rfe-kickstart-pipeline-run-4g869   18 minutes ago   1 minute   Succeeded
-```
-
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath='{.status.pipelineResults}'
-[
-  {
-    "name": "artifact-repository-storage-url",
-    "value": "https://nexus-rfe.apps.demo.sandbox132.opentlc.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"
-  },
-  {
-    "name": "serving-storage-url",
-    "value": "http://httpd-rfe.apps.demo.sandbox132.opentlc.com/hello-world/kickstarts/ibm-weather-forecaster/kickstart.ks"
-  }
-]
+export KICKSTART_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+oc get pipelinerun $KICKSTART_PIPELINE -ojsonpath='{.status.pipelineResults}'
+[{"name":"artifact-repository-storage-url","value":"https://nexus-rfe.apps.demo.sandbox2633.opentlc.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"},{"name":"serving-storage-url","value":"https://httpd-rfe.apps.demo.sandbox2633.opentlc.com/kickstarts/ibm-weather-forecaster/kickstart.ks"}]
 ```
 
 ### 確認
@@ -309,17 +278,22 @@ $ oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath='{.status.pipel
 
 ## 自動ブート用RHEL for Edgeイメージ(ISO)を生成
 
-Image Builderの機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`/`isolinux/isolinux.cfg` を設定し直します。
+Image Builderの機能のひとつに、インストーラに OSTree コミットを埋め込んだインストールメディアを構成する機能 (`image-type` `rhel-edge-installer` を使用) があります。このプロジェクトのパイプラインはさらに一歩進んで、生成された ISO にキックスタートファイルを埋め込み、埋め込まれたキックスタートを使用して RFE を自動的にインストールするように `EFI/BOOT/grub.cfg`、`isolinux/isolinux.cfg` を設定し直します。
 
 プロジェクトのルートから、以下のコマンドを実行して `rfe-oci-iso-pipeline` パイプラインを実行します。
 
 ```shell
+
+export KICKSTART_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+export PUBLISH_CONTENT_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
 tkn pipeline start rfe-oci-iso-pipeline \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
 -s rfe-automation \
 --use-param-defaults \
--p kickstart-url=$(oc get pipelinerun rfe-kickstart-pipeline-run-4g869 -ojsonpath="{.status.pipelineResults[1].value}") \
--p ostree-repo-url=$(oc get pipelinerun -n rfe rfe-oci-publish-content-pipeline-run-8sf7z -ojsonpath='{.status.pipelineResults[*].value}')/refs/heads/rhel/8/x86_64/edge
+-p kickstart-url=$(oc get pipelinerun -n rfe $KICKSTART_PIPELINE -ojsonpath="{.status.pipelineResults[1].value}") \
+-p ostree-repo-url=$(oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults[*].value}')
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
@@ -350,18 +324,12 @@ ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref
 * `build-commit-id` - Image Builder からのビルドコミット ID。
 * `iso-url` - オートブートするISOの場所。
 
-結果を表示するには、最新のパイプラインの実行を見つけます。例として、次のコマンドを使用します。
-
-```shell
-$ tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1
-NAME                             STARTED      DURATION     STATUS
-rfe-oci-iso-pipeline-run-2lpwc   3 days ago   13 minutes   Succeeded
-```
-
 次に以下を実行すると、パイプラインの結果が表示されます。
 
 ```shell
-$ oc get pipelinerun -n rfe rfe-oci-iso-pipeline-run-2lpwc -ojsonpath='{.status.pipelineResults}'
+export ISO_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-iso-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+
+oc get pipelinerun -n rfe $ISO_PIPELINE -ojsonpath='{.status.pipelineResults}'
 [
   {
     "name": "build-commit-id",
