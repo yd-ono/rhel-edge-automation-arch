@@ -76,7 +76,7 @@ rhsm:
 Workerノードとして、AWSのベアメタルインスタンスを追加します。
 
 ```shell
-export CLUSTER_ID=xxxxx
+export infrastructure_ID=$(oc get -o jsonpath='{.status.infrastructureName}' infrastructure cluster)
 cat machine-bm.yaml | envsubst | oc apply -f -
 ```
 

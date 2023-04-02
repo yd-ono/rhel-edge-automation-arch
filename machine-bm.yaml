@@ -1,23 +1,23 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
-  name: demo-${CLUSTER_ID}-bm-worker-ap-northeast-1a
+  name: ${infrastructure_ID}-bm-worker-ap-northeast-1a
   namespace: openshift-machine-api
   labels:
-    machine.openshift.io/cluster-api-cluster: demo-${CLUSTER_ID}
+    machine.openshift.io/cluster-api-cluster: ${infrastructure_ID}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: demo-${CLUSTER_ID}
-      machine.openshift.io/cluster-api-machineset: demo-${CLUSTER_ID}-bm-worker-ap-northeast-1a
+      machine.openshift.io/cluster-api-cluster: ${infrastructure_ID}
+      machine.openshift.io/cluster-api-machineset: ${infrastructure_ID}-bm-worker-ap-northeast-1a
   template:
     metadata:
       labels:
-        machine.openshift.io/cluster-api-cluster: demo-${CLUSTER_ID}
+        machine.openshift.io/cluster-api-cluster: ${infrastructure_ID}
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: demo-${CLUSTER_ID}-bm-worker-ap-northeast-1a
+        machine.openshift.io/cluster-api-machineset: ${infrastructure_ID}-bm-worker-ap-northeast-1a
     spec:
       lifecycleHooks: {}
       metadata: {}
@@ -45,11 +45,11 @@ spec:
             - filters:
                 - name: 'tag:Name'
                   values:
-                    - demo-${CLUSTER_ID}-worker-sg
+                    - ${infrastructure_ID}-worker-sg
           kind: AWSMachineProviderConfig
           metadataServiceOptions: {}
           tags:
-            - name: kubernetes.io/cluster/demo-${CLUSTER_ID}
+            - name: kubernetes.io/cluster/${infrastructure_ID}
               value: owned
           deviceIndex: 0
           ami:
@@ -58,7 +58,7 @@ spec:
             filters:
               - name: 'tag:Name'
                 values:
-                  - demo-${CLUSTER_ID}-private-ap-northeast-1a
+                  - ${infrastructure_ID}-private-ap-northeast-1a
           apiVersion: machine.openshift.io/v1beta1
           iamInstanceProfile:
-            id: demo-${CLUSTER_ID}-worker-profile
+            id: ${infrastructure_ID}-worker-profile
