@@ -102,7 +102,9 @@ demo-qwtzb-bm-worker-ap-northeast-1a-h7jsw   Running   m5.metal   ap-northeast-1
 ArgoCDが`chart`ディレクトリ配下の各Helmチャートを参照するように更新します。
 
 ```shell
-helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ -f examples/values/local/bootstrap.yaml -f examples/values/deployment/default.yaml
+helm upgrade -i -n rfe-gitops bootstrap charts/bootstrap/ \
+-f examples/values/local/bootstrap.yaml \
+-f examples/values/deployment/default.yaml
 ```
 
 デフォルトのインストールでは、クラスタ上のすべての管理対象コンポーネントのデプロイと構成が行われます。
