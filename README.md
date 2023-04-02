@@ -80,6 +80,15 @@ export infrastructure_ID=$(oc get -o jsonpath='{.status.infrastructureName}' inf
 cat machine-bm.yaml | envsubst | oc apply -f -
 ```
 
+Machineの状態がRunningとなるまで待ちます。
+
+```shell
+oc -n openshift-machine-api get machine \
+-l machine.openshift.io/cluster-api-machineset=${infrastructure_ID}-bm-worker-ap-northeast-1a
+NAME                                         PHASE     TYPE       REGION           ZONE           
+demo-qwtzb-bm-worker-ap-northeast-1a-h7jsw   Running   m5.metal   ap-northeast-1   ap-northeast-1a
+```
+
 #### OpenShift GitOps Operatorのデプロイ
 
 以下のスクリプトを実行し、OpenShift GitOps Operatorをインストールします。
