@@ -221,7 +221,7 @@ application-manager:
                         destinationNamespace: openshift-operators
                         path: charts/operator
                         annotations:
-                          argocd.argoproj.io/sync-wave: "1"
+                          argocd.argoproj.io/sync-wave: "0"
                         values:
                           operator:
                             channel: stable-3.6
