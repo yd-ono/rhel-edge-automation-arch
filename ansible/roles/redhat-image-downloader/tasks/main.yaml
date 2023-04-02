@@ -9,6 +9,10 @@
     url: "{{ redhat_sso_url }}"
   register: access_token
 
+- name: debug access Token
+  debug:
+    msg: "{{ access_token }}"
+
 - name: Generate Image Download URLs
   ansible.builtin.uri:
     follow_redirects: none
