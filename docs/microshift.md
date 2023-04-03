@@ -27,7 +27,7 @@ openssl passwd -6
 
 ### 追加のコンテンツソース
 
-以下の内容で `/tmp/microshift-additional-sources.json` というファイルを作成します。
+以下の内容で `microshift-additional-sources.json` というファイルを作成します。
 
 ```json
 {
@@ -76,7 +76,7 @@ tkn pipeline start rfe-oci-image-pipeline \
      -p blueprint-dir=microshift \
      -p blueprints-git-url=https://github.com/yd-ono/rhel-edge-automation-arch.git \
      -p blueprints-git-revision=blueprints \
-     -p additional-content-sources='$(jq -c . /tmp/microshift-additional-sources.json | base64 -w0)'
+     -p additional-content-sources='$(jq -c . ./microshift-additional-sources.json | base64 -w0)'
 ```
 
 ブループリントを更新して自分のgitリポジトリに保存した場合は、ブループリントのパラメータを自分のリポジトリに合わせて変更します。
