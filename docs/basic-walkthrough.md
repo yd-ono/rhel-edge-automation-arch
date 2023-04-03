@@ -319,6 +319,14 @@ tkn pipeline start rfe-oci-iso-pipeline \
 --use-param-defaults \
 -p kickstart-url=$(oc get pipelinerun -n rfe $KICKSTART_PIPELINE -ojsonpath="{.status.pipelineResults[1].value}") \
 -p ostree-repo-url=$(oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults[*].value}')
+
+tkn pipeline start rfe-oci-iso-pipeline \
+--workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
+-s rfe-automation \
+--use-param-defaults \
+-p kickstart-url=$(oc get pipelinerun -n rfe $KICKSTART_PIPELINE -ojsonpath="{.status.pipelineResults[1].value}") \
+-p ostree-repo-url=http://hello-world-latest-rfe.apps.demo.sandbox2379.opentlc.com/repo
+
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
