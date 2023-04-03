@@ -264,6 +264,9 @@ curl $OSTREE_REPO_URL/refs/heads/rhel/8/x86_64/edge
 `rfe-oci-stage-pipeline`または`rfe-oci-publish-content-pipeline`のいずれかのパイプラインの結果からOSTreeリポジトリの場所を使用して、次のコマンドを実行します。
 
 ```shell
+export PUBLISH_CONTENT_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-oci-publish-content-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
+export OSTREE_REPO_URL=$(oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults[*].value}')
+
 tkn pipeline start rfe-kickstart-pipeline \
 -s rfe-automation \
 --workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
@@ -319,14 +322,6 @@ tkn pipeline start rfe-oci-iso-pipeline \
 --use-param-defaults \
 -p kickstart-url=$(oc get pipelinerun -n rfe $KICKSTART_PIPELINE -ojsonpath="{.status.pipelineResults[1].value}") \
 -p ostree-repo-url=$(oc get pipelinerun -n rfe $PUBLISH_CONTENT_PIPELINE -ojsonpath='{.status.pipelineResults[*].value}')
-
-tkn pipeline start rfe-oci-iso-pipeline \
---workspace name=shared-workspace,volumeClaimTemplateFile=examples/pipelines/volumeclaimtemplate.yaml \
--s rfe-automation \
---use-param-defaults \
--p kickstart-url=$(oc get pipelinerun -n rfe $KICKSTART_PIPELINE -ojsonpath="{.status.pipelineResults[1].value}") \
--p ostree-repo-url=http://hello-world-latest-rfe.apps.demo.sandbox2379.opentlc.com/repo
-
 ```
 
 このコマンドは、前のパイプラインの実行と似ていますが、次のパラメータが使用されます。
