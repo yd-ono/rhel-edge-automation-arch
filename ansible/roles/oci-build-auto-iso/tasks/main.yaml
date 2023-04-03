@@ -67,6 +67,10 @@
         blkid -s LABEL -o value {{ iso_source_path | quote }}
       register: iso_source_label
 
+    - name: debug iso_source_label
+      debug:
+        msg: "{{ iso_source_label }}"
+
     - name: Create Working Directories
       ansible.builtin.file:
         path: "{{ item }}"

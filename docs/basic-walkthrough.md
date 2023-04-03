@@ -69,6 +69,31 @@ tkn pipeline start rfe-oci-image-pipeline \
 
 _Note: RHEL for Edgeイメージの構築プロセスには時間がかかります！_
 
+なお、Quayへのイメージのpushの際に、「connection reset by peer」によりリトライが継続することがあります。
+その際は、ローカルPCの環境などから以下のコマンドでQuayへコンテナイメージをpushできるか確認してみてください。
+
+```
+oc get secret publisher -n rfe -ojsonpath='{.data}'
+{".dockerconfigjson":"ewogICAgImF..."}
+
+echo "ewogICAgImF..." | base64 -d
+{
+    "auths": {
+        "<Quayのエンドポイント>": {
+            "auth": "cmZlK3..."
+        }
+    }
+}
+
+echo cmZlK3..." | base64 -d
+<ユーザ名>:<パスワード>
+
+podman login --tls-verify=false <Quayのエンドポイント>
+podman push registry.access.redhat.com/ubi9/ubi:latest <Quayのエンドポイント>/rfe/hello-world:9.0.0 --tls-verify=false --remove-signatures
+```
+
+
+
 ### パイプラインの結果
 
 各パイプラインの実行は、3つの結果を返します。

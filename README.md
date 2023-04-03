@@ -86,7 +86,7 @@ Machineの状態がRunningとなるまで待ちます。
 oc -n openshift-machine-api get machine \
 -l machine.openshift.io/cluster-api-machineset=${infrastructure_ID}-bm-worker-ap-northeast-1a
 NAME                                         PHASE     TYPE       REGION           ZONE           
-demo-qwtzb-bm-worker-ap-northeast-1a-h7jsw   Running   m5.metal   ap-northeast-1   ap-northeast-1a
+demo-qwtzb-bm-worker-ap-northeast-1a-h7jsw   Running   c5n.metal  ap-northeast-1   ap-northeast-1a
 ```
 
 #### OpenShift GitOps Operatorのデプロイ
@@ -119,9 +119,33 @@ oc get route argocd-server -n rfe-gitops -ojsonpath='https://{.spec.host}'
 ArgoCDの状態を確認し、SYNC STATUSが`Synced`、HEALTH STATUSが`Healthy`であれば正常にデプロイできています。
 
 ```shell
-oc get application rfe-automation -n rfe-gitops
-NAME             SYNC STATUS   HEALTH STATUS
-rfe-automation   Synced        Healthy
+$ oc get application -A
+NAMESPACE    NAME                       SYNC STATUS   HEALTH STATUS
+rfe-gitops   ansible-rfe-runner         Synced        Healthy
+rfe-gitops   catalog-sources            Synced        Healthy
+rfe-gitops   cluster-configs            Synced        Healthy
+rfe-gitops   cnv                        Synced        Healthy
+rfe-gitops   cnv-operator               Synced        Healthy
+rfe-gitops   httpd                      Synced        Healthy
+rfe-gitops   image-builder-vm           Synced        Healthy
+rfe-gitops   namespaces                 Synced        Healthy
+rfe-gitops   nexus                      Synced        Healthy
+rfe-gitops   nexus-operator             Synced        Healthy
+rfe-gitops   odf                        Synced        Healthy
+rfe-gitops   odf-operator               Synced        Healthy
+rfe-gitops   operators                  Synced        Healthy
+rfe-gitops   patch-operator             Synced        Healthy
+rfe-gitops   pipelines-operator         Synced        Healthy
+rfe-gitops   pulp                       Synced        Healthy
+rfe-gitops   pulp-operator              Synced        Healthy
+rfe-gitops   quay                       Synced        Healthy
+rfe-gitops   quay-operator              Synced        Healthy
+rfe-gitops   rbac                       Synced        Healthy
+rfe-gitops   rfe                        Synced        Healthy
+rfe-gitops   rfe-automation             Synced        Healthy
+rfe-gitops   rfe-pipelines              Synced        Healthy
+rfe-gitops   user-mgmt                  Synced        Healthy
+rfe-gitops   user-workload-monitoring   Synced        Healthy
 ```
 
 ```
