@@ -4,7 +4,7 @@
 
 本リポジトリは、[RHEL for Edge Image Build as a Service](https://github.com/redhat-cop/rhel-edge-automation-arch)のforkです。
 
-OpenShift4.12かつAWS環境で動作するように修正、改善しています。
+OpenShift4.12かつAWS環境で動作するように大幅に修正、改良しています。
 
 本リポジトリには、エッジコンピューティングへインストールするRHEL for EdgeのOSイメージのビルドとキックスタートのISO組み込みを自動化するデモが含まれます。
 
