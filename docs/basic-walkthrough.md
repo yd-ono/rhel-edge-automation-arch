@@ -412,17 +412,17 @@ curl localhost:5000
 ![サンプルアプリ](/images/app.png)
 
 ## TIPS. rootパスワードを忘れた際の対応
-### ブートメニューで`e`を押下
-### `linux`の行で`rd.break enforcing=0`を入力
-### ファイルシステムをrwへ変更
+1. ブートメニューで`e`を押下
+2. `linux`の行で`rd.break enforcing=0`を入力
+3. ファイルシステムをrwへ変更
 
 ```
 # mount –o remount,rw /sysroot
 ```
-### パスワード変更
+
+4. パスワード変更
 ```
 # chroot /sysroot
 # passwd
 # exit
 ```
-
