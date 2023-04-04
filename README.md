@@ -2,7 +2,13 @@
 
 ## はじめに
 
-本リポジトリは、エッジコンピューティングへインストールするRHEL for EdgeのOSイメージのビルドとキックスタートの組み込みを自動化するデモです。本デモの出力として、HTTPDサーバにキックスタートファイルの組み込まれたOSイメージ(.iso)が格納されます。そのHTTPDサーバのURLをインストールソースとしてネットワークブートすることで、エッジデバイスへのOSのデプロイメントと構築作業を自動化します。
+本リポジトリは、[RHEL for Edge Image Build as a Service](https://github.com/redhat-cop/rhel-edge-automation-arch)のforkです。
+
+OpenShift4.12かつAWS環境で動作するように修正、改善しています。
+
+本リポジトリには、エッジコンピューティングへインストールするRHEL for EdgeのOSイメージのビルドとキックスタートのISO組み込みを自動化するデモが含まれます。
+本デモのアウトプットとして、Webサーバにキックスタートファイルの組み込まれたOSイメージ(.iso)が格納されます。
+そのWebサーバのURLをインストールソースとしてPXEブートすることで、エッジデバイスへのOSのデプロイメントと構築作業を自動化できます。
 
 ## アーキテクチャ
 ![全体アーキテクチャ](/images/overall-architecture.png)
@@ -162,12 +168,12 @@ oc edit tektonconfig -n openshift-pipelines
 ...
 ```
 
-## Basic Walkthrough
-RHEL for Edgeのコンテンツを構築し、それを使ってRHEL for Edgeのインスタンスを作成するまでのエンドツーエンドの流れを示す基本的なウォークスルーは、以下のとおりです。
+## 基本編
+RHEL for Edge+Podmanアプリを含むOSイメージを作成します。
 
 * [Basic Walkthrough](./docs/basic-walkthrough.md)
 
-## Advanced
-追加のImage Builderコンテンツソースを使用するMicroShiftイメージの構築のより高度な例は、ここで見つけることができます。
+## 応用編
+MicroShiftを含むOSイメージを作成します。
 
 * [MicroShift](./docs/microshift.md)
