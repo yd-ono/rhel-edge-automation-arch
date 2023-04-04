@@ -378,29 +378,51 @@ wget http://httpd-rfe.apps.demo.sandbox725.opentlc.com/46014545-0974-4295-b794-c
 
 ### VirtualBoxで仮想マシンを作成
 
+### 仮想マシンを新規作成します
 ![仮想マシン作成](/images/vmcreate.png)
+
+CPUコア、メモリ、DISKサイズは任意の値を指定してください。
+
+### EFIを有効化します
+![EFI有効化](/images/iso.png)
+
+### 作成したISOファイルを指定します
 ![ISO指定](/images/iso.png)
-![ISO指定](/images/kickstart.gif)
+
+### 仮想マシンを起動すると自動インストールが開始します
+![Kickstartの様子](/images/kickstart.gif)
 
 ### アプリケーションの確認
 
 マシンが再起動したら、ノードのインストールの一部として作成されたユーザーでログインします。
-
-_Note: この例では、デフォルトで、ユーザとして以下の `core` を、パスワードとして `edge` を指定しています。_
-
 ログインしたら、アプリケーションコンテナが起動していることを確認します。
 
 ```shell
 sudo podman ps
 ```
 
-最後に、アプリケーションのSwaggerエンドポイントがリクエストに応答することを確認します。
+`localhost:5000`へHTTPアクセスするとサンプルアプリのHTMLがレスポンスします。
 
 ```shell
 curl localhost:5000
 ```
 
-アプリケーションとの対話に関するその他の詳細は、[プロジェクトリポジトリ](https://github.com/IBM/MAX-Weather-Forecaster)に記載されています。
+参考. サンプルアプリは天気予報APIのSwaggerの画面です。
 
-以上です。
+![サンプルアプリ](/images/app.png)
+
+## TIPS. rootパスワードを忘れた際の対応
+### ブートメニューで`e`を押下
+### `linux`の行で`rd.break enforcing=0`を入力
+### ファイルシステムをrwへ変更
+
+```
+# mount –o remount,rw /sysroot
+```
+### パスワード変更
+```
+# chroot /sysroot
+# passwd
+# exit
+```
 
