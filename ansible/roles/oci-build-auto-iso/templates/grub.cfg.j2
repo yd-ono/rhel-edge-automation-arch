@@ -21,6 +21,6 @@ search --no-floppy --set=root -l '{{ iso_source_label.stdout }}'
 
 ### BEGIN /etc/grub.d/10_linux ###
 menuentry 'RHEL for Edge Kickstart' --class fedora --class gnu-linux --class gnu --class os {
-    linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_source_label.stdout }} inst.ks={{ kickstart_url.stdout }}
+    linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_source_label.stdout }} inst.ks={{ kickstart_url }}
     initrdefi /images/pxeboot/initrd.img
 }
