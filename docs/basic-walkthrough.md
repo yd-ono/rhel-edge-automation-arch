@@ -73,23 +73,23 @@ _Note: RHEL for Edgeイメージの構築プロセスには時間がかかりま
 その際は、ローカルPCの環境などから以下のコマンドでQuayへコンテナイメージをpushできるか確認してみてください。
 
 ```
-oc get secret publisher -n rfe -ojsonpath='{.data}'
-{".dockerconfigjson":"ewogICAgImF..."}
-
-echo "ewogICAgImF..." | base64 -d
+oc get secret publisher -n rfe -ojsonpath='{.data.\.dockerconfigjson}' | base64 -d
 {
     "auths": {
-        "<Quayのエンドポイント>": {
-            "auth": "cmZlK3..."
+        "quay-quay-quay.apps....": {
+            "auth": "cmZlK..."
         }
     }
 }
+export QUAY_USER=$(echo cmZlK... | base64 -d | awk -F":" '{print $1}')
+export QUAY_PASSWORD=$(echo cmZlK... | base64 -d | awk -F":" '{print $2}')
+podman login --tls-verify=false $(oc get route quay-quay -n quay -ojsonpath='{.spec.host}') \
+--username $QUAY_USER --password $QUAY_PASSWORD
 
-echo cmZlK3..." | base64 -d
-<ユーザ名>:<パスワード>
-
-podman login --tls-verify=false <Quayのエンドポイント>
-podman push registry.access.redhat.com/ubi9/ubi:latest <Quayのエンドポイント>/rfe/hello-world:9.0.0 --tls-verify=false --remove-signatures
+podman push registry.access.redhat.com/ubi9/ubi:latest \
+$(oc get route quay-quay -n quay -ojsonpath='{.spec.host}')/rfe/hello-world:9.0.0 \
+--tls-verify=false \
+--remove-signatures
 ```
 
 

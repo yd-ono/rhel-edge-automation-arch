@@ -62,6 +62,6 @@ label rfe-kickstart
   menu label ^RHEL for Edge Kickstart
   menu default
   kernel vmlinuz
-  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_source_label.stdout }} inst.ks=cdrom:/kickstart.ks
+  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_source_label.stdout }} inst.ks={{ kickstart_url }}
 
 menu end
