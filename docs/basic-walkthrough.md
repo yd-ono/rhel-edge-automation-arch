@@ -374,14 +374,13 @@ oc get pipelinerun -n rfe $ISO_PIPELINE -ojsonpath='{.status.pipelineResults}'
 wget http://httpd-rfe.apps.demo.sandbox725.opentlc.com/46014545-0974-4295-b794-c6fb1cc5a347-auto.iso
 ```
 
-### VirtualBoxでの動作確認
+![Tekton Pipelineの状態](/images/tekton.png)
 
-[新規]ボタンを押下し、以下のパラメータをしてしてOSをブートします。
+### VirtualBoxで仮想マシンを作成
 
-名前： 任意の仮想マシン名
-ISO Image: ローカルへダウンロードした自動ブート用ISO
-
-[設定]-[システム]で`EFIを有効化`とします。
+![仮想マシン作成](/images/vmcreate.png)
+![ISO指定](/images/iso.png)
+![ISO指定](/images/kickstart.gif)
 
 ### アプリケーションの確認
 
