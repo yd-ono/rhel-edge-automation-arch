@@ -167,7 +167,7 @@ RHEL for Edgeのコンテンツを構築し、それを使ってRHEL for Edgeの
 
 * [Basic Walkthrough](./docs/basic-walkthrough.md)
 
-## Basic Walkthrough
+## Advanced
 追加のImage Builderコンテンツソースを使用するMicroShiftイメージの構築のより高度な例は、ここで見つけることができます。
 
 * [MicroShift](./docs/microshift.md)

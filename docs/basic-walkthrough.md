@@ -297,7 +297,7 @@ tkn pipeline` コマンドの出力は、ビルドの進捗を見るための別
 export KICKSTART_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rfe-kickstart-pipeline --limit 1 -ojsonpath='{.items[*].metadata.name}')
 
 oc get pipelinerun $KICKSTART_PIPELINE -ojsonpath='{.status.pipelineResults}'
-[{"name":"artifact-repository-storage-url","value":"https://nexus-rfe.apps.demo.sandbox2633.opentlc.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"},{"name":"serving-storage-url","value":"https://httpd-rfe.apps.demo.sandbox2633.opentlc.com/kickstarts/ibm-weather-forecaster/kickstart.ks"}]
+[{"name":"artifact-repository-storage-url","value":"https://nexus-rfe.apps.demo.sandbox2633.opentlc.com/repository/rfe-kickstarts/ibm-weather-forecaster/kickstart.ks"},{"name":"serving-storage-url","value":"http://httpd-rfe.apps.demo.sandbox2633.opentlc.com/kickstarts/ibm-weather-forecaster/kickstart.ks"}]
 ```
 
 ### 確認
@@ -349,8 +349,7 @@ ostreesetup --nogpg --url=file:///ostree/repo/ --osname=rhel --remote=edge --ref
 
 各パイプラインの実行は、2つの結果を返します。
 
-* `build-commit-id` - Image Builder からのビルドコミット ID。
-* `iso-url` - オートブートするISOの場所。
+* `iso-url` - オートブートするISOの場所
 
 次に以下を実行すると、パイプラインの結果が表示されます。
 
@@ -360,37 +359,29 @@ export ISO_PIPELINE=$(tkn pipelinerun list -n rfe --label tekton.dev/pipeline=rf
 oc get pipelinerun -n rfe $ISO_PIPELINE -ojsonpath='{.status.pipelineResults}'
 [
   {
-    "name": "build-commit-id",
-    "value": "2cbce183-4a18-4e47-97bd-47e983b5652c"
-  },
-  {
     "name": "iso-url",
-    "value": "https://httpd-rfe.apps.cluster.com/2cbce183-4a18-4e47-97bd-47e983b5652c-auto.iso"
+    "value": "http://httpd-rfe.apps.demo.sandbox725.opentlc.com/46014545-0974-4295-b794-c6fb1cc5a347-auto.iso"
   }
 ]
 ```
 
-### 確認
+### 検証
 
-検証するには、`iso-url`パイプラインの結果で定義されたURLを使ってISOを引き出すだけです。
-
-## RHEL for Edgeノードの生成
-
-### 自動ブート用ISOを使用する
-
+`iso-url`パイプラインの結果として出力されたURLへアクセスするとISOをダウンロードできます。
 自動ブート用ISOは、RHEL for Edgeを自動的にインストールするように構成されており、ユーザーの入力は必要ありません。ISOを起動するだけで、インストールできます。
 
-### キックスタートファイルを手動で指定する場合
-
-キックスタートファイルと OSTree リポジトリがセットアップされているため、RHELブートイメージを使用して新しいマシンをブートし、エッジ用の新しい RHEL を作成します。
-
-ブートメニューで、タブキーを押し、ブート引数のリストに以下を追加します。
-
-```shell
-inst.ks=<URL_OF_KICKSTART_FILE>
+```
+wget http://httpd-rfe.apps.demo.sandbox725.opentlc.com/46014545-0974-4295-b794-c6fb1cc5a347-auto.iso
 ```
 
-Enter を押して、キックスタートを使用してマシンを起動します。マシンはOSTreeのコンテンツを取得し、サンプルアプリケーションを実行するための準備をします。完了すると、マシンは再起動します
+### VirtualBoxでの動作確認
+
+[新規]ボタンを押下し、以下のパラメータをしてしてOSをブートします。
+
+名前： 任意の仮想マシン名
+ISO Image: ローカルへダウンロードした自動ブート用ISO
+
+[設定]-[システム]で`EFIを有効化`とします。
 
 ### アプリケーションの確認
 
