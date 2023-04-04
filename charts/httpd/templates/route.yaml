@@ -7,9 +7,6 @@ metadata:
   name: {{ template "common.names.fullname" . }}
   namespace: {{ template "common.names.namespace" $ }}
 spec:
-  tls:
-    insecureEdgeTerminationPolicy: Redirect
-    termination: edge
   port:
     targetPort: 8080-tcp
   to:
